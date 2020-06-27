@@ -1,13 +1,31 @@
+use crossterm::{cursor, style::Print, QueueableCommand, ExecutableCommand};
+
 pub struct Game {
-    pub running: bool,
+    pub stdout: std::io::Stdout,
     pub map: Map,
+    pub running: bool,
 }
 
 impl Game {
-    pub fn new(map: Map) -> Self {
+    pub fn new(stdout: std::io::Stdout, map: Map) -> Self {
         Game {
+            stdout,
+            map,
             running: false,
-            map
+        }
+    }
+
+    pub fn render_map(&mut self) {
+        for x in 0..self.map.width {
+            for y in 0..self.map.height {
+                let chars_to_print = match self.map.cells[self.map.pos(x, y)] {
+                    false => ". ",
+                    true => "██",
+                };
+
+                self.stdout.queue(cursor::MoveTo((x * 2) as u16, y as u16)).unwrap()
+                           .execute(Print(chars_to_print)).unwrap();
+            }
         }
     }
 }
@@ -15,7 +33,7 @@ impl Game {
 pub struct Map {
     width: usize,
     height: usize,
-    cells: Vec<bool>, // Switch to array?
+    cells: Vec<bool>,
 }
 
 impl Map {
@@ -27,23 +45,7 @@ impl Map {
         }
     }
 
-    pub fn get_map_string(&self) -> String {
-        let mut map_string = String::new();
-        for i in 0..self.cells.len() {
-            match self.cells[i] {
-                false => map_string.push_str(". "),
-                true => map_string.push_str("██"),
-            }
-
-            // Append newline character at the edge of the map
-            if (i + 1) % self.width == 0 {
-                map_string.push_str("\n");
-            }
-        }
-        map_string
-    }
-
-    pub fn get_index(&self, x: usize, y: usize) -> usize {
+    pub fn pos(&self, x: usize, y: usize) -> usize {
         (x * self.width) + y
     }
 }

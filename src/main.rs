@@ -11,10 +11,11 @@ use std::time::{Duration, Instant};
 mod game;
 
 fn main() {
+    let stdout = stdout();
     let terminal_size = terminal::size();
     println!("{:?}", terminal_size);
-    let map = game::Map::new(10, 10);
-    let game = game::Game::new(map);
+    let map = game::Map::new(30, 30);
+    let game = game::Game::new(stdout, map);
 
     run(game);
 }
@@ -59,14 +60,7 @@ fn run(mut game: game::Game) {
             // Render
             if current_time < next_time {
                 render_count += 1;
-
-                stdout()
-                    .queue(terminal::Clear(terminal::ClearType::All))
-                    .unwrap()
-                    .queue(cursor::MoveTo(0, 0))
-                    .unwrap()
-                    .execute(Print(game.map.get_map_string()))
-                    .unwrap();
+                game.render_map();
             }
         } else {
             sleep(Duration::from_millis(next_time - current_time));
