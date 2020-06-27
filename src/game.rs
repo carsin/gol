@@ -59,9 +59,28 @@ impl Map {
         }
     }
 
-    fn update(&self) {
+    fn update(&mut self) {
         let mut next_generation = self.cells.clone();
-        println!("{}", self.get_cell_live_neighbor_count(0, 0));
+        for x in 0..self.width {
+            for y in 0..self.height {
+                let pos = self.pos(x, y);
+                // Live cell checks
+                if self.cells[pos] == true {
+                    let next_state = match self.get_cell_live_neighbor_count(x, y) {
+                        2 | 3 => true,
+                        _ => false,
+                    };
+
+                    next_generation[pos] = next_state;
+                } else { // Dead cell checks
+                    if self.get_cell_live_neighbor_count(x, y) == 3 {
+                        next_generation[pos] = true;
+                    }
+                }
+            }
+        }
+
+        self.cells = next_generation;
     }
 
     fn get_cell_live_neighbor_count(&self, x: usize, y: usize) -> usize {
@@ -86,7 +105,7 @@ impl Map {
 
             if self.cells[self.pos(x, y - 1)] == true { neighbor_count += 1 } // Top middle
 
-            if x < self.width { // If not on right edge
+            if x < self.width - 1 { // If not on right edge
                 if self.cells[self.pos(x + 1, y - 1)] == true { neighbor_count += 1 } // Top right
             }
         }
@@ -96,19 +115,19 @@ impl Map {
             if self.cells[self.pos(x - 1, y)] == true { neighbor_count += 1 } // Middle left
         }
 
-        if x < self.width { // If not on right edge
+        if x < self.width - 1{ // If not on right edge
             if self.cells[self.pos(x + 1, y)] == true { neighbor_count += 1 } // Middle right
         }
 
         // Bottom row checks
-        if y < self.height  { // If not on bottom edge
+        if y < self.height - 1 { // If not on bottom edge
             if x > 0 { // If not on left edge
                 if self.cells[self.pos(x - 1, y + 1)] == true { neighbor_count += 1 } // Bottom left
             }
 
             if self.cells[self.pos(x, y + 1)] == true { neighbor_count += 1 } // Bottom middle
 
-            if x < self.width { // If not on right edge
+            if x < self.width - 1{ // If not on right edge
                 if self.cells[self.pos(x + 1, y + 1)] == true { neighbor_count += 1 } // Bottom right
             }
         }
