@@ -1,6 +1,6 @@
 extern crate crossterm;
 
-const UPDATES_PER_SECONDS: u64 = 5;
+const UPDATES_PER_SECONDS: u64 = 2;
 const UPDATE_SPEED: u64 = 1000 / UPDATES_PER_SECONDS;
 
 use crossterm::{cursor, event, terminal, ExecutableCommand};
@@ -38,7 +38,7 @@ fn run(mut game: game::Game) {
         if current_time >= next_time {
             next_time += UPDATE_SPEED;
             // Handle input
-            while let Ok(true) = event::poll(Duration::from_millis(UPDATE_SPEED)) {
+            while let Ok(true) = event::poll(Duration::from_millis(10)) {
                 match event::read().unwrap() {
                     // Key Input
                     event::Event::Key(event) => match event.code {
@@ -50,6 +50,7 @@ fn run(mut game: game::Game) {
             }
 
             // Update
+            game.update();
 
             // Render
             if current_time < next_time {

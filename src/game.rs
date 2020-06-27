@@ -1,4 +1,5 @@
 use crossterm::{cursor, style::Print, ExecutableCommand, QueueableCommand};
+use rand::random;
 
 pub struct Game {
     pub stdout: std::io::Stdout,
@@ -13,6 +14,10 @@ impl Game {
             map,
             running: false,
         }
+    }
+
+    pub fn update(&mut self) {
+        self.map.update();
     }
 
     pub fn render_map(&mut self) {
@@ -41,14 +46,24 @@ pub struct Map {
 
 impl Map {
     pub fn new(width: usize, height: usize) -> Self {
+        // Initialize the map randomly
+        let mut cells = vec![false; width * height];
+        for i in 0..cells.len() {
+            cells[i] = random(); // Random generates a bool
+        }
+
         Map {
             width,
             height,
-            cells: vec![false; width * height],
+            cells,
         }
     }
 
-    pub fn pos(&self, x: usize, y: usize) -> usize {
+    fn update(&self) {
+        let mut new_cells = self.cells.clone();
+    }
+
+    fn pos(&self, x: usize, y: usize) -> usize {
         (x * self.width) + y
     }
 }
