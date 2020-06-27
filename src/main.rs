@@ -3,7 +3,7 @@ extern crate crossterm;
 const UPDATES_PER_SECONDS: u64 = 5;
 const UPDATE_SPEED: u64 = 1000 / UPDATES_PER_SECONDS;
 
-use crossterm::{cursor, style::Print, terminal, ExecutableCommand, QueueableCommand, event};
+use crossterm::{cursor, event, terminal, ExecutableCommand};
 use std::io::stdout;
 use std::thread::sleep;
 use std::time::{Duration, Instant};
@@ -32,9 +32,6 @@ fn run(mut game: game::Game) {
     let start_time = Instant::now();
     let mut next_time = start_time.elapsed().as_millis() as u64;
 
-    let mut update_count = 0;
-    let mut render_count = 0;
-
     game.running = true;
     while game.running {
         let current_time = start_time.elapsed().as_millis() as u64;
@@ -44,22 +41,18 @@ fn run(mut game: game::Game) {
             while let Ok(true) = event::poll(Duration::from_millis(UPDATE_SPEED)) {
                 match event::read().unwrap() {
                     // Key Input
-                    event::Event::Key(event) => {
-                        match event.code {
-                            event::KeyCode::Char('q') => game.running = false,
-                            _ => (),
-                        }
+                    event::Event::Key(event) => match event.code {
+                        event::KeyCode::Char('q') => game.running = false,
+                        _ => (),
                     },
                     _ => (),
                 }
             }
 
             // Update
-            update_count += 1;
 
             // Render
             if current_time < next_time {
-                render_count += 1;
                 game.render_map();
             }
         } else {

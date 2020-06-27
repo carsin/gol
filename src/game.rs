@@ -1,4 +1,4 @@
-use crossterm::{cursor, style::Print, QueueableCommand, ExecutableCommand};
+use crossterm::{cursor, style::Print, ExecutableCommand, QueueableCommand};
 
 pub struct Game {
     pub stdout: std::io::Stdout,
@@ -23,8 +23,11 @@ impl Game {
                     true => "██",
                 };
 
-                self.stdout.queue(cursor::MoveTo((x * 2) as u16, y as u16)).unwrap()
-                           .execute(Print(chars_to_print)).unwrap();
+                self.stdout
+                    .queue(cursor::MoveTo((x * 2) as u16, y as u16))
+                    .unwrap()
+                    .execute(Print(chars_to_print))
+                    .unwrap();
             }
         }
     }
