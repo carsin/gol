@@ -1,15 +1,14 @@
 extern crate crossterm;
 
-const UPDATES_PER_SECONDS: u64 = 2;
+const UPDATES_PER_SECONDS: u64 = 5;
 const UPDATE_SPEED: u64 = 1000 / UPDATES_PER_SECONDS;
 
-use crossterm::{cursor, style::Print, terminal, ExecutableCommand, QueueableCommand};
+use crossterm::{cursor, style::Print, terminal, ExecutableCommand, QueueableCommand, event};
 use std::io::stdout;
 use std::thread::sleep;
 use std::time::{Duration, Instant};
 
-pub mod game;
-mod input;
+mod game;
 
 fn main() {
     let map = game::Map::new(10, 10);
@@ -39,7 +38,18 @@ fn run(mut game: game::Game) {
         if current_time >= next_time {
             next_time += UPDATE_SPEED;
             // Handle input
-            input::handle_input(&mut game);
+            while let Ok(true) = event::poll(Duration::from_millis(UPDATE_SPEED)) {
+                match event::read().unwrap() {
+                    // Key Input
+                    event::Event::Key(event) => {
+                        match event.code {
+                            event::KeyCode::Char('q') => game.running = false,
+                            _ => (),
+                        }
+                    },
+                    _ => (),
+                }
+            }
 
             // Update
             update_count += 1;
@@ -52,17 +62,6 @@ fn run(mut game: game::Game) {
                     .unwrap()
                     .queue(Print(game.map.get_map_string()))
                     .unwrap();
-
-                //stdout()
-                    //.queue(cursor::MoveTo(0, 0))
-                    //.unwrap()
-                    //.queue(Print(format!("Updates: {}", update_count)))
-                    //.unwrap();
-                //stdout()
-                    //.queue(cursor::MoveTo(0, 1))
-                    //.unwrap()
-                    //.execute(Print(format!("Renders: {}", render_count)))
-                    //.unwrap();
             }
         } else {
             sleep(Duration::from_millis(next_time - current_time));
