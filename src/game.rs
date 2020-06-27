@@ -1,3 +1,17 @@
+pub struct Game {
+    pub running: bool,
+    pub map: Map,
+}
+
+impl Game {
+    pub fn new(map: Map) -> Self {
+        Game {
+            running: false,
+            map
+        }
+    }
+}
+
 pub struct Map {
     width: usize,
     height: usize,
@@ -21,7 +35,7 @@ impl Map {
                 true => map_string.push_str("██"),
             }
 
-            // Append newline character if we're at the edge of the map
+            // Append newline character at the edge of the map
             if (i + 1) % self.width == 0 {
                 map_string.push_str("\n");
             }

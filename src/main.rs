@@ -8,27 +8,38 @@ use std::io::stdout;
 use std::thread::sleep;
 use std::time::{Duration, Instant};
 
-mod game;
+pub mod game;
+mod input;
 
 fn main() {
     let map = game::Map::new(10, 10);
-    println!("{}", map.get_map_string());
-    //start(map);
+    let game = game::Game::new(map);
+
+    run(game);
 }
 
-fn run(map: game::Map) {
+fn run(mut game: game::Game) {
+    // Set up terminal
+    stdout().execute(terminal::EnterAlternateScreen).unwrap();
+    terminal::enable_raw_mode().unwrap();
+    stdout().execute(cursor::Hide).unwrap();
+    stdout()
+        .execute(terminal::Clear(terminal::ClearType::All))
+        .unwrap();
+
     let start_time = Instant::now();
     let mut next_time = start_time.elapsed().as_millis() as u64;
 
     let mut update_count = 0;
     let mut render_count = 0;
 
-    let running = true;
-    while running {
+    game.running = true;
+    while game.running {
         let current_time = start_time.elapsed().as_millis() as u64;
         if current_time >= next_time {
             next_time += UPDATE_SPEED;
             // Handle input
+            input::handle_input(&mut game);
 
             // Update
             update_count += 1;
@@ -39,7 +50,7 @@ fn run(map: game::Map) {
                 stdout()
                     .queue(cursor::MoveTo(0, 0))
                     .unwrap()
-                    .queue(Print(map.get_map_string()))
+                    .queue(Print(game.map.get_map_string()))
                     .unwrap();
 
                 //stdout()
@@ -58,19 +69,6 @@ fn run(map: game::Map) {
         }
     }
     stop();
-}
-
-fn start(map: game::Map) {
-    // Set up terminal
-    stdout().execute(terminal::EnterAlternateScreen).unwrap();
-    terminal::enable_raw_mode().unwrap();
-    stdout().execute(cursor::Hide).unwrap();
-    stdout()
-        .execute(terminal::Clear(terminal::ClearType::All))
-        .unwrap();
-
-    // Start game loop
-    run(map);
 }
 
 fn stop() {
