@@ -60,7 +60,60 @@ impl Map {
     }
 
     fn update(&self) {
-        let mut new_cells = self.cells.clone();
+        let mut next_generation = self.cells.clone();
+        println!("{}", self.get_cell_live_neighbor_count(0, 0));
+    }
+
+    fn get_cell_live_neighbor_count(&self, x: usize, y: usize) -> usize {
+        let mut neighbor_count: usize = 0;
+        //         █         █
+        // x-1,y-1 █ x,  y-1 █ x+1,y-1
+        //         █         █
+        // █████████████████████████████
+        //         █         █
+        // x-1,y   █ x,  y   █ x+1,y
+        //         █         █
+        // █████████████████████████████
+        //         █         █
+        // x-1,y+1 █ x,  y+1 █ x+1,y+1
+        //         █         █
+
+        // Top row checks
+        if y > 0 { // If not on top edge
+            if x > 0 { // If not on left edge
+                if self.cells[self.pos(x - 1, y - 1)] == true { neighbor_count += 1 } // Top left
+            }
+
+            if self.cells[self.pos(x, y - 1)] == true { neighbor_count += 1 } // Top middle
+
+            if x < self.width { // If not on right edge
+                if self.cells[self.pos(x + 1, y - 1)] == true { neighbor_count += 1 } // Top right
+            }
+        }
+
+        // Middle row checks
+        if x > 0 { // If not on left edge
+            if self.cells[self.pos(x - 1, y)] == true { neighbor_count += 1 } // Middle left
+        }
+
+        if x < self.width { // If not on right edge
+            if self.cells[self.pos(x + 1, y)] == true { neighbor_count += 1 } // Middle right
+        }
+
+        // Bottom row checks
+        if y < self.height  { // If not on bottom edge
+            if x > 0 { // If not on left edge
+                if self.cells[self.pos(x - 1, y + 1)] == true { neighbor_count += 1 } // Bottom left
+            }
+
+            if self.cells[self.pos(x, y + 1)] == true { neighbor_count += 1 } // Bottom middle
+
+            if x < self.width { // If not on right edge
+                if self.cells[self.pos(x + 1, y + 1)] == true { neighbor_count += 1 } // Bottom right
+            }
+        }
+
+        neighbor_count
     }
 
     fn pos(&self, x: usize, y: usize) -> usize {
