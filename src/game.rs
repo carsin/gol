@@ -146,13 +146,13 @@ impl Map {
             }
 
             if self.cells[self.pos(x, y + 1)] == true {
-                neighbor_count += 1
+                neighbor_count += 1;
             } // Bottom middle
 
             if x < self.width - 1 {
                 // If not on right edge
                 if self.cells[self.pos(x + 1, y + 1)] == true {
-                    neighbor_count += 1
+                    neighbor_count += 1;
                 } // Bottom right
             }
         }
