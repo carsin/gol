@@ -72,7 +72,8 @@ impl Map {
                     };
 
                     next_generation[pos] = next_state;
-                } else { // Dead cell checks
+                } else {
+                    // Dead cell checks
                     if self.get_cell_live_neighbor_count(x, y) == 3 {
                         next_generation[pos] = true;
                     }
@@ -98,37 +99,61 @@ impl Map {
         //         █         █
 
         // Top row checks
-        if y > 0 { // If not on top edge
-            if x > 0 { // If not on left edge
-                if self.cells[self.pos(x - 1, y - 1)] == true { neighbor_count += 1 } // Top left
+        if y > 0 {
+            // If not on top edge
+            if x > 0 {
+                // If not on left edge
+                if self.cells[self.pos(x - 1, y - 1)] == true {
+                    neighbor_count += 1
+                } // Top left
             }
 
-            if self.cells[self.pos(x, y - 1)] == true { neighbor_count += 1 } // Top middle
+            if self.cells[self.pos(x, y - 1)] == true {
+                neighbor_count += 1
+            } // Top middle
 
-            if x < self.width - 1 { // If not on right edge
-                if self.cells[self.pos(x + 1, y - 1)] == true { neighbor_count += 1 } // Top right
+            if x < self.width - 1 {
+                // If not on right edge
+                if self.cells[self.pos(x + 1, y - 1)] == true {
+                    neighbor_count += 1
+                } // Top right
             }
         }
 
         // Middle row checks
-        if x > 0 { // If not on left edge
-            if self.cells[self.pos(x - 1, y)] == true { neighbor_count += 1 } // Middle left
+        if x > 0 {
+            // If not on left edge
+            if self.cells[self.pos(x - 1, y)] == true {
+                neighbor_count += 1
+            } // Middle left
         }
 
-        if x < self.width - 1{ // If not on right edge
-            if self.cells[self.pos(x + 1, y)] == true { neighbor_count += 1 } // Middle right
+        if x < self.width - 1 {
+            // If not on right edge
+            if self.cells[self.pos(x + 1, y)] == true {
+                neighbor_count += 1
+            } // Middle right
         }
 
         // Bottom row checks
-        if y < self.height - 1 { // If not on bottom edge
-            if x > 0 { // If not on left edge
-                if self.cells[self.pos(x - 1, y + 1)] == true { neighbor_count += 1 } // Bottom left
+        if y < self.height - 1 {
+            // If not on bottom edge
+            if x > 0 {
+                // If not on left edge
+                if self.cells[self.pos(x - 1, y + 1)] == true {
+                    neighbor_count += 1
+                } // Bottom left
             }
 
-            if self.cells[self.pos(x, y + 1)] == true { neighbor_count += 1 } // Bottom middle
+            if self.cells[self.pos(x, y + 1)] == true {
+                neighbor_count += 1
+            } // Bottom middle
 
-            if x < self.width - 1{ // If not on right edge
-                if self.cells[self.pos(x + 1, y + 1)] == true { neighbor_count += 1 } // Bottom right
+            if x < self.width - 1 {
+                // If not on right edge
+                if self.cells[self.pos(x + 1, y + 1)] == true {
+                    neighbor_count += 1
+                } // Bottom right
             }
         }
 
