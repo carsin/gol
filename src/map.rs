@@ -25,19 +25,19 @@ impl Map {
         let mut next_generation = self.cells.clone();
         for x in 0..self.width {
             for y in 0..self.height {
-                let pos = self.pos(x, y);
+                let cell_pos = self.pos(x, y);
                 // Live cell checks
-                if self.cells[pos] == true {
+                if self.cells[cell_pos] == true {
                     let next_state = match self.get_cell_live_neighbor_count(x, y) {
                         2 | 3 => true,
                         _ => false,
                     };
 
-                    next_generation[pos] = next_state;
+                    next_generation[cell_pos] = next_state;
                 } else {
                     // Dead cell checks
                     if self.get_cell_live_neighbor_count(x, y) == 3 {
-                        next_generation[pos] = true;
+                        next_generation[cell_pos] = true;
                     }
                 }
             }
@@ -48,74 +48,82 @@ impl Map {
 
     fn get_cell_live_neighbor_count(&self, x: usize, y: usize) -> usize {
         let mut neighbor_count: usize = 0;
-        //         █         █
-        // x-1,y-1 █ x,  y-1 █ x+1,y-1
-        //         █         █
-        // █████████████████████████████
-        //         █         █
-        // x-1,y   █ x,  y   █ x+1,y
-        //         █         █
-        // █████████████████████████████
-        //         █         █
-        // x-1,y+1 █ x,  y+1 █ x+1,y+1
-        //         █         █
+        //         |         |
+        // x-1,y-1 | x,  y-1 | x+1,y-1
+        //         |         |
+        // --------+---------+----------
+        //         |         |
+        // x-1,y   | x,  y   | x+1,y
+        //         |         |
+        // --------+---------+----------
+        //         |         |
+        // x-1,y+1 | x,  y+1 | x+1,y+1
+        //         |         |
 
         // Top row checks
+        // If not on top edge
         if y > 0 {
-            // If not on top edge
+            // If not on left edge
             if x > 0 {
-                // If not on left edge
+                // Top left
                 if self.cells[self.pos(x - 1, y - 1)] == true {
                     neighbor_count += 1
-                } // Top left
+                }
             }
 
+            // Top middle
             if self.cells[self.pos(x, y - 1)] == true {
                 neighbor_count += 1
-            } // Top middle
+            }
 
+            // If not on right edge
             if x < self.width - 1 {
-                // If not on right edge
+                // Top right
                 if self.cells[self.pos(x + 1, y - 1)] == true {
                     neighbor_count += 1
-                } // Top right
+                }
             }
         }
 
         // Middle row checks
+        // If not on left edge
         if x > 0 {
-            // If not on left edge
+            // Middle left
             if self.cells[self.pos(x - 1, y)] == true {
                 neighbor_count += 1
-            } // Middle left
+            }
         }
 
+        // If not on right edge
         if x < self.width - 1 {
-            // If not on right edge
+            // Middle right
             if self.cells[self.pos(x + 1, y)] == true {
                 neighbor_count += 1
-            } // Middle right
+            }
         }
 
         // Bottom row checks
+        // If not on bottom edge
         if y < self.height - 1 {
-            // If not on bottom edge
+            // If not on left edge
             if x > 0 {
-                // If not on left edge
+                // Bottom left
                 if self.cells[self.pos(x - 1, y + 1)] == true {
                     neighbor_count += 1
-                } // Bottom left
+                }
             }
 
+            // Bottom middle
             if self.cells[self.pos(x, y + 1)] == true {
                 neighbor_count += 1;
-            } // Bottom middle
+            }
 
+            // If not on right edge
             if x < self.width - 1 {
-                // If not on right edge
+                // Bottom right
                 if self.cells[self.pos(x + 1, y + 1)] == true {
                     neighbor_count += 1;
-                } // Bottom right
+                }
             }
         }
 
@@ -123,6 +131,6 @@ impl Map {
     }
 
     pub fn pos(&self, x: usize, y: usize) -> usize {
-        (x * self.width) + y
+        (y * self.width) + x
     }
 }

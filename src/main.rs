@@ -15,7 +15,7 @@ fn main() {
     let stdout = stdout();
     let terminal_size = terminal::size();
     println!("{:?}", terminal_size);
-    let map = map::Map::new(50, 40);
+    let map = map::Map::new(40, 40);
     let game = game::Game::new(stdout, map);
 
     run(game);
