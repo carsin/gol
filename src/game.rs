@@ -53,8 +53,16 @@ impl Game {
                     .unwrap()
                     .execute(Print(chars_to_print))
                     .unwrap();
+
+
             }
         }
+
+        self.stdout
+            .queue(cursor::MoveTo(0, 0))
+            .unwrap()
+            .execute(Print(format!("X: {}, Y: {}", self.camera_x, self.camera_y)))
+            .unwrap();
     }
 
     pub fn process_input(&mut self, input: event::KeyCode) {
