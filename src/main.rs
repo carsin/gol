@@ -13,9 +13,7 @@ mod map;
 
 fn main() {
     let stdout = stdout();
-    let terminal_size = terminal::size();
-    println!("{:?}", terminal_size);
-    let map = map::Map::new(40, 40);
+    let map = map::Map::new(500, 500);
     let game = game::Game::new(stdout, map);
 
     run(game);
@@ -39,13 +37,19 @@ fn run(mut game: game::Game) {
         if current_time >= next_time {
             next_time += UPDATE_SPEED;
             // Handle input
-            while let Ok(true) = event::poll(Duration::from_millis(10)) {
+            while let Ok(true) = event::poll(Duration::from_millis(100)) {
                 match event::read().unwrap() {
-                    // Key Input
+                    // Key input
                     event::Event::Key(event) => match event.code {
                         event::KeyCode::Char('q') => game.running = false,
+                        event::KeyCode::Char('w') => game.camera_y -= 1,
+                        event::KeyCode::Char('a') => game.camera_x -= 1,
+                        event::KeyCode::Char('s') => game.camera_y += 1,
+                        event::KeyCode::Char('d') => game.camera_x += 1,
                         _ => (),
                     },
+                    // Terminal resize
+                    event::Event::Resize(width, height) => game.resize_viewport(width as usize, height as usize),
                     _ => (),
                 }
             }
