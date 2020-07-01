@@ -40,14 +40,7 @@ fn run(mut game: game::Game) {
             while let Ok(true) = event::poll(Duration::from_millis(100)) {
                 match event::read().unwrap() {
                     // Key input
-                    event::Event::Key(event) => match event.code {
-                        event::KeyCode::Char('q') => game.running = false,
-                        event::KeyCode::Char('w') => game.camera_y -= 1,
-                        event::KeyCode::Char('a') => game.camera_x -= 1,
-                        event::KeyCode::Char('s') => game.camera_y += 1,
-                        event::KeyCode::Char('d') => game.camera_x += 1,
-                        _ => (),
-                    },
+                    event::Event::Key(event) => game.process_input(event.code),
                     // Terminal resize
                     event::Event::Resize(width, height) => game.resize_viewport(width as usize, height as usize),
                     _ => (),
@@ -58,9 +51,9 @@ fn run(mut game: game::Game) {
             game.update();
 
             // Render
-            if current_time < next_time {
+            //if current_time < next_time {
                 game.render_map();
-            }
+            //}
         } else {
             sleep(Duration::from_millis(next_time - current_time));
         }

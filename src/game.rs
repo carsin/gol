@@ -1,4 +1,4 @@
-use crossterm::{terminal, cursor, style::Print, ExecutableCommand, QueueableCommand};
+use crossterm::{event, terminal, cursor, style::Print, ExecutableCommand, QueueableCommand};
 use super::map;
 
 pub struct Game {
@@ -55,6 +55,18 @@ impl Game {
                     .unwrap();
             }
         }
+    }
+
+    pub fn process_input(&mut self, input: event::KeyCode) {
+        match input {
+            event::KeyCode::Char('q') => self.running = false,
+            event::KeyCode::Char('w') => self.camera_y -= 1,
+            event::KeyCode::Char('a') => self.camera_x -= 1,
+            event::KeyCode::Char('s') => self.camera_y += 1,
+            event::KeyCode::Char('d') => self.camera_x += 1,
+            _ => (),
+        }
+        self.render_map();
     }
 
     pub fn resize_viewport(&mut self, width: usize, height: usize) {
