@@ -1,6 +1,6 @@
 extern crate crossterm;
 
-const UPDATES_PER_SECONDS: u64 = 5;
+const UPDATES_PER_SECONDS: u64 = 6;
 const UPDATE_SPEED: u64 = 1000 / UPDATES_PER_SECONDS;
 
 use crossterm::{cursor, event, terminal, ExecutableCommand};

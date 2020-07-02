@@ -68,10 +68,10 @@ impl Game {
     pub fn process_input(&mut self, input: event::KeyCode) {
         match input {
             event::KeyCode::Char('q') => self.running = false,
-            event::KeyCode::Char('w') => self.camera_y -= 1,
-            event::KeyCode::Char('a') => self.camera_x -= 1,
-            event::KeyCode::Char('s') => self.camera_y += 1,
-            event::KeyCode::Char('d') => self.camera_x += 1,
+            event::KeyCode::Char('w') | event::KeyCode::Char('k') => self.camera_y -= 1,
+            event::KeyCode::Char('a') | event::KeyCode::Char('h') => self.camera_x -= 1,
+            event::KeyCode::Char('s') | event::KeyCode::Char('j') => self.camera_y += 1,
+            event::KeyCode::Char('d') | event::KeyCode::Char('l') => self.camera_x += 1,
             _ => (),
         }
         self.render_map();
