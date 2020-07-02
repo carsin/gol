@@ -42,7 +42,9 @@ fn run(mut game: game::Game) {
                     // Key input
                     event::Event::Key(event) => game.process_input(event.code),
                     // Terminal resize
-                    event::Event::Resize(width, height) => game.resize_viewport(width as usize, height as usize),
+                    event::Event::Resize(width, height) => {
+                        game.resize_viewport(width as usize, height as usize)
+                    }
                     _ => (),
                 }
             }
@@ -52,8 +54,8 @@ fn run(mut game: game::Game) {
 
             // Render
             //if current_time < next_time {
-                game.render_map();
-            //}
+            game.render_map();
+        //}
         } else {
             sleep(Duration::from_millis(next_time - current_time));
         }
