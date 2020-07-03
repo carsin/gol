@@ -1,5 +1,6 @@
-use super::map;
 use crossterm::{cursor, event, style::Print, terminal, ExecutableCommand, QueueableCommand};
+
+use super::map;
 
 pub struct Game {
     pub stdout: std::io::Stdout,
@@ -22,7 +23,6 @@ impl Game {
         let camera_x = map.width / 2;
         let camera_y = map.height / 2;
 
-        println!("width: {}, height: {}", viewport_width, viewport_height);
         Game {
             stdout,
             map,
@@ -41,12 +41,27 @@ impl Game {
     pub fn render_map(&mut self) {
         for x in 0..self.viewport_width {
             for y in 0..self.viewport_height {
-                // Render around camera
-                let x_pos: usize = x + self.camera_x - (((self.viewport_width / 2) as f64).round() as usize);
-                let y_pos: usize = y + self.camera_y - (((self.viewport_height / 2) as f64).round() as usize);
-                let chars_to_print = match self.map.cells[self.map.pos(x_pos, y_pos)] {
-                    false => ". ",
-                    true => "██",
+                // Calculate the position to render return none if negative (can't access negative array indicies)
+                let x_pos = (x + self.camera_x).checked_sub(((self.viewport_width / 2) as f64).round() as usize);
+                let y_pos = (y + self.camera_y).checked_sub(((self.viewport_height / 2) as f64).round() as usize);
+                let positions = [x_pos, y_pos];
+
+                // Get Some(value) if element exists, None if it doesn't
+                // let element = self.map.cells.get(self.map.pos(x_pos, y_pos));
+                let chars_to_print = match positions {
+                    // Render inputs with bad indices as blank
+                    [None, None] => "  ",
+                    [None, Some(_)] => "  ",
+                    [Some(_), None] => "  ",
+                    // Good input
+                    [Some(x), Some(y)] => {
+                        // Returns none if invalid index is accessed, but since all negative inputs are filtered out it only checks bad indices beyond the array
+                        match self.map.cells.get(self.map.pos(x, y)) {
+                            Some(false) => ". ",
+                            Some(true) => "██",
+                            None => "  ",
+                        }
+                    },
                 };
 
                 self.stdout
