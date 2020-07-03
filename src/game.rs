@@ -2,6 +2,10 @@ use crossterm::{cursor, event, style::Print, terminal, ExecutableCommand, Queuea
 
 use super::map;
 
+enum Direction {
+    North, South, East, West
+}
+
 pub struct Game {
     pub stdout: std::io::Stdout,
     pub map: map::Map,
@@ -55,7 +59,7 @@ impl Game {
                     [Some(_), None] => "  ",
                     // Good input
                     [Some(x), Some(y)] => {
-                        // Returns none if invalid index is accessed, but since all negative inputs are filtered out it only checks bad indices beyond the array
+                        // Returns none if invalid index , but since all negative inputs are filtered out it only checks bad indices beyond the array
                         match self.map.cells.get(self.map.pos(x, y)) {
                             Some(false) => ". ",
                             Some(true) => "██",
@@ -82,13 +86,38 @@ impl Game {
     pub fn process_input(&mut self, input: event::KeyCode) {
         match input {
             event::KeyCode::Char('q') => self.running = false,
-            event::KeyCode::Char('w') | event::KeyCode::Char('k') => self.camera_y -= 1,
-            event::KeyCode::Char('a') | event::KeyCode::Char('h') => self.camera_x -= 1,
-            event::KeyCode::Char('s') | event::KeyCode::Char('j') => self.camera_y += 1,
-            event::KeyCode::Char('d') | event::KeyCode::Char('l') => self.camera_x += 1,
+            event::KeyCode::Char('w') | event::KeyCode::Char('k') => self.move_camera(Direction::North),
+            event::KeyCode::Char('a') | event::KeyCode::Char('h') => self.move_camera(Direction::West),
+            event::KeyCode::Char('s') | event::KeyCode::Char('j') => self.move_camera(Direction::South),
+            event::KeyCode::Char('d') | event::KeyCode::Char('l') => self.move_camera(Direction::East),
             _ => (),
         }
         self.render_map();
+    }
+
+    fn move_camera(&mut self, dir: Direction) {
+        match dir {
+            Direction::North => {
+                if self.camera_y != 0 {
+                    self.camera_y -= 1;
+                }
+            },
+            Direction::South => {
+                if self.camera_y != self.map.height - 1 {
+                    self.camera_y += 1;
+                }
+            },
+            Direction::East => {
+                if self.camera_x != self.map.width - 1 {
+                    self.camera_x += 1;
+                }
+            },
+            Direction::West => {
+                if self.camera_x != 0 {
+                    self.camera_x -= 1;
+                }
+            },
+        }
     }
 
     pub fn resize_viewport(&mut self, width: usize, height: usize) {
