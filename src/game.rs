@@ -21,7 +21,7 @@ impl Game {
         let viewport_dimensions = terminal::size().unwrap();
 
         // Width is half of terminal because each cell is rendered as 2 characters wide
-        let viewport_width = ((viewport_dimensions.0 / 2) as f64).round() as usize;
+        let viewport_width = (viewport_dimensions.0 / 2) as usize;
         let viewport_height = viewport_dimensions.1 as usize;
 
         let camera_x = map.width / 2;
@@ -46,8 +46,6 @@ impl Game {
         for x in 0..self.viewport_width {
             for y in 1..self.viewport_height {
                 // Calculate the position to render return none if negative (can't access negative array indicies)
-                //let x_pos = (x + self.camera_x).checked_sub(((self.viewport_width / 2) as f64).round() as usize);
-                //let y_pos = (y + self.camera_y).checked_sub(((self.viewport_height / 2) as f64).round() as usize);
                 let x_pos = (x + self.camera_x).checked_sub((self.viewport_width / 2) as usize);
                 let y_pos = (y + self.camera_y).checked_sub((self.viewport_height / 2) as usize);
                 let positions = [x_pos, y_pos];
@@ -63,7 +61,7 @@ impl Game {
                         }
                     },
                     // Render inputs with indices that failed the checked subtraction as blank
-                    _ => " ",
+                    _ => "  ",
                 };
 
                 self.stdout
