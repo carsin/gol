@@ -3,8 +3,8 @@ extern crate crossterm;
 const UPDATES_PER_SECONDS: u64 = 6;
 const UPDATE_SPEED: u64 = 1000 / UPDATES_PER_SECONDS;
 
-use crossterm::{cursor, event, terminal, ExecutableCommand};
-use std::io::stdout;
+use crossterm::{cursor, event, terminal, QueueableCommand};
+use std::io::{stdout, Write};
 use std::thread::sleep;
 use std::time::{Duration, Instant};
 
@@ -13,7 +13,7 @@ mod map;
 
 fn main() {
     let stdout = stdout();
-    let map = map::Map::new(200, 200);
+    let map = map::Map::new(100, 100);
     let game = game::Game::new(stdout, map);
 
     run(game);
@@ -21,12 +21,11 @@ fn main() {
 
 fn run(mut game: game::Game) {
     // Set up terminal
-    stdout().execute(terminal::EnterAlternateScreen).unwrap();
+    game.stdout.queue(terminal::EnterAlternateScreen).unwrap();
+    game.stdout.queue(cursor::Hide).unwrap();
+    game.stdout.queue(terminal::Clear(terminal::ClearType::All)).unwrap();
     terminal::enable_raw_mode().unwrap();
-    stdout().execute(cursor::Hide).unwrap();
-    stdout()
-        .execute(terminal::Clear(terminal::ClearType::All))
-        .unwrap();
+    stdout().flush().unwrap();
 
     let start_time = Instant::now();
     let mut next_time = start_time.elapsed().as_millis() as u64;
@@ -53,7 +52,9 @@ fn run(mut game: game::Game) {
             game.update();
 
             // Render
+            //game.stdout.queue(terminal::Clear(terminal::ClearType::All)).unwrap();
             game.render_map();
+            game.stdout.flush().unwrap();
         } else {
             sleep(Duration::from_millis(next_time - current_time));
         }
@@ -63,8 +64,9 @@ fn run(mut game: game::Game) {
 
 fn stop() {
     // Restore terminal after game is finished
-    stdout().execute(cursor::Show).unwrap();
+    stdout().queue(cursor::Show).unwrap();
+    stdout().queue(terminal::LeaveAlternateScreen).unwrap();
     terminal::disable_raw_mode().unwrap();
-    stdout().execute(terminal::LeaveAlternateScreen).unwrap();
+    stdout().flush().unwrap();
     println!("Game exited successfully");
 }

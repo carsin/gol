@@ -1,4 +1,4 @@
-use crossterm::{cursor, event, style::Print, terminal, ExecutableCommand, QueueableCommand};
+use crossterm::{cursor, event, style::Print, terminal, QueueableCommand};
 
 use super::map;
 
@@ -44,34 +44,32 @@ impl Game {
 
     pub fn render_map(&mut self) {
         for x in 0..self.viewport_width {
-            for y in 0..self.viewport_height {
+            for y in 1..self.viewport_height {
                 // Calculate the position to render return none if negative (can't access negative array indicies)
-                let x_pos = (x + self.camera_x).checked_sub(((self.viewport_width / 2) as f64).round() as usize);
-                let y_pos = (y + self.camera_y).checked_sub(((self.viewport_height / 2) as f64).round() as usize);
+                //let x_pos = (x + self.camera_x).checked_sub(((self.viewport_width / 2) as f64).round() as usize);
+                //let y_pos = (y + self.camera_y).checked_sub(((self.viewport_height / 2) as f64).round() as usize);
+                let x_pos = (x + self.camera_x).checked_sub((self.viewport_width / 2) as usize);
+                let y_pos = (y + self.camera_y).checked_sub((self.viewport_height / 2) as usize);
                 let positions = [x_pos, y_pos];
 
-                // Get Some(value) if element exists, None if it doesn't
-                // let element = self.map.cells.get(self.map.pos(x_pos, y_pos));
                 let chars_to_print = match positions {
-                    // Render inputs with bad indices as blank
-                    [None, None] => "  ",
-                    [None, Some(_)] => "  ",
-                    [Some(_), None] => "  ",
                     // Good input
                     [Some(x), Some(y)] => {
-                        // Returns none if invalid index , but since all negative inputs are filtered out it only checks bad indices beyond the array
+                        // Returns none if invalid index , but since all negative inputs are filtered out with the previous checked subtraction it only checks bad indices beyond the array
                         match self.map.cells.get(self.map.pos(x, y)) {
                             Some(false) => ". ",
                             Some(true) => "██",
                             None => "  ",
                         }
                     },
+                    // Render inputs with indices that failed the checked subtraction as blank
+                    _ => " ",
                 };
 
                 self.stdout
                     .queue(cursor::MoveTo((x * 2) as u16, y as u16))
                     .unwrap()
-                    .execute(Print(chars_to_print))
+                    .queue(Print(chars_to_print))
                     .unwrap();
             }
         }
@@ -79,7 +77,7 @@ impl Game {
         self.stdout
             .queue(cursor::MoveTo(0, 0))
             .unwrap()
-            .execute(Print(format!("X: {}, Y: {}", self.camera_x, self.camera_y)))
+            .queue(Print(format!("X: {}, Y: {}", self.camera_x, self.camera_y)))
             .unwrap();
     }
 
@@ -92,6 +90,7 @@ impl Game {
             event::KeyCode::Char('d') | event::KeyCode::Char('l') => self.move_camera(Direction::East),
             _ => (),
         }
+
         self.render_map();
     }
 
@@ -103,12 +102,12 @@ impl Game {
                 }
             },
             Direction::South => {
-                if self.camera_y != self.map.height - 1 {
+                if self.camera_y != self.map.height {
                     self.camera_y += 1;
                 }
             },
             Direction::East => {
-                if self.camera_x != self.map.width - 1 {
+                if self.camera_x != self.map.width {
                     self.camera_x += 1;
                 }
             },
@@ -123,6 +122,5 @@ impl Game {
     pub fn resize_viewport(&mut self, width: usize, height: usize) {
         self.viewport_width = width;
         self.viewport_height = height;
-        self.render_map();
     }
 }
