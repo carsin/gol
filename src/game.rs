@@ -41,10 +41,9 @@ impl Game {
     pub fn render_map(&mut self) {
         for x in 0..self.viewport_width {
             for y in 0..self.viewport_height {
-                let x_pos: usize =
-                    x + self.camera_x - (((self.viewport_width / 2) as f64).round() as usize);
-                let y_pos: usize =
-                    y + self.camera_y - (((self.viewport_height / 2) as f64).round() as usize);
+                // Render around camera
+                let x_pos: usize = x + self.camera_x - (((self.viewport_width / 2) as f64).round() as usize);
+                let y_pos: usize = y + self.camera_y - (((self.viewport_height / 2) as f64).round() as usize);
                 let chars_to_print = match self.map.cells[self.map.pos(x_pos, y_pos)] {
                     false => ". ",
                     true => "██",

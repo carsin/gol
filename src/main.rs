@@ -53,9 +53,7 @@ fn run(mut game: game::Game) {
             game.update();
 
             // Render
-            //if current_time < next_time {
             game.render_map();
-        //}
         } else {
             sleep(Duration::from_millis(next_time - current_time));
         }
