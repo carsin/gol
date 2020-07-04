@@ -1,5 +1,4 @@
 use rand::random;
-//use std::cmp::min;
 
 pub struct Map {
     pub width: usize,

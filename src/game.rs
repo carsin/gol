@@ -1,4 +1,5 @@
 use crossterm::{cursor, event, style::Print, terminal, QueueableCommand};
+use std::cmp::max;
 
 use super::map;
 
@@ -85,7 +86,30 @@ impl Game {
             .unwrap();
     }
 
-    pub fn process_input(&mut self, input: event::KeyCode) {
+    pub fn process_mouse_input(&mut self, input: event::MouseEvent) {
+        match input {
+            event::MouseEvent::Down(event::MouseButton::Left, click_x, click_y, _) | event::MouseEvent::Drag(event::MouseButton::Left, click_x, click_y, _) => {
+                let click_x_index = (self.camera_x + (click_x / 2) as usize).checked_sub(max(self.viewport_width / 2, self.map.width / 2));
+                let click_y_index = (self.camera_y + click_y as usize).checked_sub(max(self.viewport_height / 2, self.map.height / 2));
+
+                let positions = [click_x_index, click_y_index];
+                match positions {
+                    [Some(click_x_index), Some(click_y_index)] => {
+                        if let Some(index) = self.map.pos(click_x_index, click_y_index) {
+                            self.map.cells[index] = true;
+                        }
+                    },
+                    _ => ()
+                }
+
+            },
+            _ => (),
+        }
+
+        self.render_map();
+    }
+
+    pub fn process_key_input(&mut self, input: event::KeyCode) {
         match input {
             event::KeyCode::Char('q') => self.running = false,
             event::KeyCode::Char('w') | event::KeyCode::Char('k') => self.move_camera(Direction::North),
@@ -124,8 +148,9 @@ impl Game {
         }
     }
 
-    pub fn resize_viewport(&mut self, width: usize, height: usize) {
-        self.viewport_width = width;
-        self.viewport_height = height;
-    }
+    // TODO: Fix
+    //pub fn resize_viewport(&mut self, width: usize, height: usize) {
+        //self.viewport_width = width;
+        //self.viewport_height = height;
+    //}
 }

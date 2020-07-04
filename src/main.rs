@@ -13,7 +13,7 @@ mod map;
 
 fn main() {
     let stdout = stdout();
-    let map = map::Map::new(500, 500);
+    let map = map::Map::new(50, 50);
     let game = game::Game::new(stdout, map);
 
     run(game);
@@ -26,6 +26,7 @@ fn run(mut game: game::Game) {
     game.stdout
         .queue(terminal::Clear(terminal::ClearType::All))
         .unwrap();
+    game.stdout.queue(event::EnableMouseCapture).unwrap();
     terminal::enable_raw_mode().unwrap();
     stdout().flush().unwrap();
 
@@ -41,11 +42,13 @@ fn run(mut game: game::Game) {
             while let Ok(true) = event::poll(Duration::from_millis(100)) {
                 match event::read().unwrap() {
                     // Key input
-                    event::Event::Key(event) => game.process_input(event.code),
+                    event::Event::Key(key_event) => game.process_key_input(key_event.code),
+                    event::Event::Mouse(mouse_event) => game.process_mouse_input(mouse_event),
+                    // TODO: Fix
                     // Terminal resize
-                    event::Event::Resize(width, height) => {
-                        game.resize_viewport(width as usize, height as usize)
-                    },
+                    //event::Event::Resize(width, height) => {
+                        //game.resize_viewport(width as usize, height as usize)
+                    //},
                     _ => (),
                 }
             }
@@ -60,14 +63,16 @@ fn run(mut game: game::Game) {
             sleep(Duration::from_millis(next_time - current_time));
         }
     }
-    stop();
+
+    stop(game);
 }
 
-fn stop() {
+fn stop(mut game: game::Game) {
     // Restore terminal after game is finished
-    stdout().queue(cursor::Show).unwrap();
-    stdout().queue(terminal::LeaveAlternateScreen).unwrap();
+    game.stdout.queue(cursor::Show).unwrap();
+    game.stdout.queue(terminal::LeaveAlternateScreen).unwrap();
     terminal::disable_raw_mode().unwrap();
-    stdout().flush().unwrap();
+    game.stdout.queue(event::DisableMouseCapture).unwrap();
+    game.stdout.flush().unwrap();
     println!("Game exited successfully");
 }
