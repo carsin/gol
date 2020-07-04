@@ -14,6 +14,7 @@ pub struct Game {
     pub stdout: std::io::Stdout,
     pub map: map::Map,
     pub running: bool,
+    pub paused: bool,
     pub viewport_width: usize,
     pub viewport_height: usize,
     pub camera_x: usize,
@@ -35,6 +36,7 @@ impl Game {
             stdout,
             map,
             running: false,
+            paused: false,
             viewport_width,
             viewport_height,
             camera_x,
@@ -116,6 +118,7 @@ impl Game {
             event::KeyCode::Char('a') | event::KeyCode::Char('h') => self.move_camera(Direction::West),
             event::KeyCode::Char('s') | event::KeyCode::Char('j') => self.move_camera(Direction::South),
             event::KeyCode::Char('d') | event::KeyCode::Char('l') => self.move_camera(Direction::East),
+            event::KeyCode::Char(' ') => self.paused = !self.paused,
             event::KeyCode::Enter => self.map.change_cell_state(self.camera_x, self.camera_y),
             _ => (),
         }

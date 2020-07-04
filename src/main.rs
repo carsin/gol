@@ -39,7 +39,7 @@ fn run(mut game: game::Game) {
         if current_time >= next_time {
             next_time += UPDATE_SPEED;
             // Handle input
-            while let Ok(true) = event::poll(Duration::from_millis(100)) {
+            while let Ok(true) = event::poll(Duration::from_millis(50)) {
                 match event::read().unwrap() {
                     // Key input
                     event::Event::Key(key_event) => game.process_key_input(key_event.code),
@@ -54,7 +54,9 @@ fn run(mut game: game::Game) {
             }
 
             // Update
-            game.update();
+            if !game.paused {
+                game.update();
+            }
 
             // Render
             game.render_map();
