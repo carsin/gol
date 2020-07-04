@@ -3,7 +3,10 @@ use crossterm::{cursor, event, style::Print, terminal, QueueableCommand};
 use super::map;
 
 enum Direction {
-    North, South, East, West
+    North,
+    South,
+    East,
+    West,
 }
 
 pub struct Game {
@@ -56,13 +59,13 @@ impl Game {
                         // Check if position is valid (within array)
                         if let Some(pos) = self.map.pos(x, y) {
                             match self.map.cells[pos] {
-                                true  => "██",
+                                true => "██",
                                 false => ". ",
                             }
                         } else {
                             "  "
                         }
-                    },
+                    }
                     // Render blank if checked substitution failed
                     _ => "  ",
                 };
@@ -85,10 +88,18 @@ impl Game {
     pub fn process_input(&mut self, input: event::KeyCode) {
         match input {
             event::KeyCode::Char('q') => self.running = false,
-            event::KeyCode::Char('w') | event::KeyCode::Char('k') => self.move_camera(Direction::North),
-            event::KeyCode::Char('a') | event::KeyCode::Char('h') => self.move_camera(Direction::West),
-            event::KeyCode::Char('s') | event::KeyCode::Char('j') => self.move_camera(Direction::South),
-            event::KeyCode::Char('d') | event::KeyCode::Char('l') => self.move_camera(Direction::East),
+            event::KeyCode::Char('w') | event::KeyCode::Char('k') => {
+                self.move_camera(Direction::North)
+            }
+            event::KeyCode::Char('a') | event::KeyCode::Char('h') => {
+                self.move_camera(Direction::West)
+            }
+            event::KeyCode::Char('s') | event::KeyCode::Char('j') => {
+                self.move_camera(Direction::South)
+            }
+            event::KeyCode::Char('d') | event::KeyCode::Char('l') => {
+                self.move_camera(Direction::East)
+            }
             _ => (),
         }
 
@@ -101,22 +112,22 @@ impl Game {
                 if self.camera_y != 0 {
                     self.camera_y -= 1;
                 }
-            },
+            }
             Direction::South => {
                 if self.camera_y != self.map.height {
                     self.camera_y += 1;
                 }
-            },
+            }
             Direction::East => {
                 if self.camera_x != self.map.width {
                     self.camera_x += 1;
                 }
-            },
+            }
             Direction::West => {
                 if self.camera_x != 0 {
                     self.camera_x -= 1;
                 }
-            },
+            }
         }
     }
 

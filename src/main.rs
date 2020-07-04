@@ -23,7 +23,9 @@ fn run(mut game: game::Game) {
     // Set up terminal
     game.stdout.queue(terminal::EnterAlternateScreen).unwrap();
     game.stdout.queue(cursor::Hide).unwrap();
-    game.stdout.queue(terminal::Clear(terminal::ClearType::All)).unwrap();
+    game.stdout
+        .queue(terminal::Clear(terminal::ClearType::All))
+        .unwrap();
     terminal::enable_raw_mode().unwrap();
     stdout().flush().unwrap();
 
