@@ -66,7 +66,7 @@ impl Game {
                             "  "
                         }
                     }
-                    // Render blank if checked substitution failed
+                    // Render blank if checked_sub failed
                     _ => "  ",
                 };
 

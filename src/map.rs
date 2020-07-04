@@ -1,5 +1,5 @@
 use rand::random;
-use std::cmp::min;
+//use std::cmp::min;
 
 pub struct Map {
     pub width: usize,
@@ -47,33 +47,79 @@ impl Map {
         self.cells = next_generation;
     }
 
-    fn get_cell_live_neighbor_count(&self, cell_x: usize, cell_y: usize) -> usize {
-        let mut neighbors: usize = 0;
+    fn get_cell_live_neighbor_count(&self, x: usize, y: usize) -> usize {
+/* Neighbor points diagram {{{
+ *                 |         |
+ *         x-1,y-1 | x,  y-1 | x+1,y-1
+ *                 |         |
+ *         --------+---------+----------
+ *                 |         |
+ *         x-1,y   | x,  y   | x+1,y
+ *                 |         |
+ *         --------+---------+----------
+ *                 |         |
+ *         x-1,y+1 | x,  y+1 | x+1,y+1
+ *                 |         |
+ *
+ }}}*/
+    let mut neighbors: usize = 0;
 
-        let left_neighbors = cell_x.checked_sub(1).unwrap_or(0);
-        let top_neighbors = cell_y.checked_sub(1).unwrap_or(0);
+      // Top row checks
+        // If not on top edge
+        if y > 0 {
+            // If not on left edge
+            if x > 0 {
+                neighbors += self.get_state_at_pos(x - 1, y - 1).unwrap_or(false) as usize; // Top left
+            }
 
-        let right_neighbors = min(self.width - 1, cell_x + 1);
-        let bottom_neighbors = min(self.height - 1, cell_y + 1);
+            neighbors += self.get_state_at_pos(x, y - 1).unwrap_or(false) as usize; // Top middle
 
-        for x in left_neighbors..right_neighbors + 1 {
-            for y in top_neighbors..bottom_neighbors + 1 {
-                if cell_x == x && cell_y == y {
-                    continue;
-                } else {
-                    if let Some(pos) = self.pos(x, y) {
-                        if self.cells[pos] {
-                            neighbors += 1;
-                        }
-                    }
-                }
+            // If not on right edge
+            if x < self.width - 1 {
+                neighbors += self.get_state_at_pos(x + 1, y - 1).unwrap_or(false) as usize; // Top right
             }
         }
 
+        // Middle row checks
+        // If not on left edge
+        if x > 0 {
+            neighbors += self.get_state_at_pos(x - 1, y).unwrap_or(false) as usize; // Middle left
+        }
+
+        // If not on right edge
+        if x < self.width - 1 {
+            neighbors += self.get_state_at_pos(x + 1, y).unwrap_or(false) as usize; // Middle right
+        }
+
+        // Bottom row checks
+        // If not on bottom edge
+        if y < self.height - 1 {
+            // If not on left edge
+            if x > 0 {
+                neighbors += self.get_state_at_pos(x - 1, y + 1).unwrap_or(false) as usize; // Bottom left
+            }
+
+            neighbors += self.get_state_at_pos(x, y + 1).unwrap_or(false) as usize; // Bottom middle
+
+            // If not on right edge
+            if x < self.width - 1 {
+                neighbors += self.get_state_at_pos(x + 1, y + 1).unwrap_or(false) as usize; // Bottom right
+            }
+        }
         neighbors
     }
 
+    fn get_state_at_pos(&self, x: usize, y: usize) -> Option<bool> {
+        let index = self.pos(x, y);
+        if let Some(pos) = index {
+            Some(self.cells[pos])
+        } else {
+            None
+        }
+    }
+
     pub fn pos(&self, x: usize, y: usize) -> Option<usize> {
+        // Only have to check if beyond array on positive side as input parameters are unsigned
         if x > self.width - 1 || y > self.height - 1 {
             None
         } else {
