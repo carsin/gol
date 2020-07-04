@@ -1,4 +1,5 @@
 use rand::random;
+use std::cmp::{min, max};
 
 pub struct Map {
     pub width: usize,
@@ -46,89 +47,30 @@ impl Map {
         self.cells = next_generation;
     }
 
-    fn get_cell_live_neighbor_count(&self, x: usize, y: usize) -> usize {
-        // TODO: Refactor this
-        let mut neighbor_count: usize = 0;
-        //         |         |
-        // x-1,y-1 | x,  y-1 | x+1,y-1
-        //         |         |
-        // --------+---------+----------
-        //         |         |
-        // x-1,y   | x,  y   | x+1,y
-        //         |         |
-        // --------+---------+----------
-        //         |         |
-        // x-1,y+1 | x,  y+1 | x+1,y+1
-        //         |         |
+    fn get_cell_live_neighbor_count(&self, cell_x: usize, cell_y: usize) -> usize {
+        let mut neighbors: usize = 0;
 
-        // Top row checks
-        // If not on top edge
-        if y > 0 {
-            // If not on left edge
-            if x > 0 {
-                // Top left
-                if self.cells[self.pos(x - 1, y - 1).unwrap()] == true {
-                    neighbor_count += 1
-                }
-            }
+        let left_neighbors = cell_x.checked_sub(1).unwrap_or(0);
+        let top_neighbors = cell_y.checked_sub(1).unwrap_or(0);
 
-            // Top middle
-            if self.cells[self.pos(x, y - 1).unwrap()] == true {
-                neighbor_count += 1
-            }
+        let right_neighbors = min(self.width - 1, cell_x + 1);
+        let bottom_neighbors = min(self.height - 1, cell_y + 1);
 
-            // If not on right edge
-            if x < self.width - 1 {
-                // Top right
-                if self.cells[self.pos(x + 1, y - 1).unwrap()] == true {
-                    neighbor_count += 1
+        for x in left_neighbors..right_neighbors + 1 {
+            for y in top_neighbors..bottom_neighbors + 1 {
+                if cell_x == x && cell_y == y {
+                    continue;
+                } else {
+                    if let Some(pos) = self.pos(x, y) {
+                        if self.cells[pos] {
+                            neighbors += 1;
+                        }
+                    }
                 }
             }
         }
 
-        // Middle row checks
-        // If not on left edge
-        if x > 0 {
-            // Middle left
-            if self.cells[self.pos(x - 1, y).unwrap()] == true {
-                neighbor_count += 1
-            }
-        }
-
-        // If not on right edge
-        if x < self.width - 1 {
-            // Middle right
-            if self.cells[self.pos(x + 1, y).unwrap()] == true {
-                neighbor_count += 1
-            }
-        }
-
-        // Bottom row checks
-        // If not on bottom edge
-        if y < self.height - 1 {
-            // If not on left edge
-            if x > 0 {
-                // Bottom left
-                if self.cells[self.pos(x - 1, y + 1).unwrap()] == true {
-                    neighbor_count += 1
-                }
-            }
-
-            // Bottom middle
-            if self.cells[self.pos(x, y + 1).unwrap()] == true {
-                neighbor_count += 1;
-            }
-
-            // If not on right edge
-            if x < self.width - 1 {
-                // Bottom right
-                if self.cells[self.pos(x + 1, y + 1).unwrap()] == true {
-                    neighbor_count += 1;
-                }
-            }
-        }
-
-        neighbor_count
+        neighbors
     }
 
     pub fn pos(&self, x: usize, y: usize) -> Option<usize> {
