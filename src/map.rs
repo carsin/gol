@@ -48,23 +48,23 @@ impl Map {
     }
 
     fn get_cell_live_neighbor_count(&self, x: usize, y: usize) -> usize {
-/* Neighbor points diagram {{{
- *                 |         |
- *         x-1,y-1 | x,  y-1 | x+1,y-1
- *                 |         |
- *         --------+---------+----------
- *                 |         |
- *         x-1,y   | x,  y   | x+1,y
- *                 |         |
- *         --------+---------+----------
- *                 |         |
- *         x-1,y+1 | x,  y+1 | x+1,y+1
- *                 |         |
- *
- }}}*/
-    let mut neighbors: usize = 0;
-
-      // Top row checks
+        /* Neighbor points diagram {{{
+        *                 |         |
+        *         x-1,y-1 | x,  y-1 | x+1,y-1
+        *                 |         |
+        *         --------+---------+----------
+        *                 |         |
+        *         x-1,y   | x,  y   | x+1,y
+        *                 |         |
+        *         --------+---------+----------
+        *                 |         |
+        *         x-1,y+1 | x,  y+1 | x+1,y+1
+        *                 |         |
+        *
+        }}}*/
+        let mut neighbors: usize = 0;
+        // Neighbor checks {{{
+        // Top row checks
         // If not on top edge
         if y > 0 {
             // If not on left edge
@@ -106,7 +106,14 @@ impl Map {
                 neighbors += self.get_state_at_pos(x + 1, y + 1).unwrap_or(false) as usize; // Bottom right
             }
         }
+        // }}}
         neighbors
+    }
+
+    pub fn change_cell_state(&mut self, x: usize, y: usize) {
+        if let Some(pos) = self.pos(x, y) {
+            self.cells[pos] = !self.cells[pos];
+        }
     }
 
     fn get_state_at_pos(&self, x: usize, y: usize) -> Option<bool> {

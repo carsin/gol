@@ -45,7 +45,7 @@ fn run(mut game: game::Game) {
                     // Terminal resize
                     event::Event::Resize(width, height) => {
                         game.resize_viewport(width as usize, height as usize)
-                    }
+                    },
                     _ => (),
                 }
             }
