@@ -25,7 +25,7 @@ impl Map {
         let mut next_generation = self.cells.clone();
         for x in 0..self.width {
             for y in 0..self.height {
-                let cell_pos = self.pos(x, y);
+                let cell_pos = self.pos(x, y).unwrap();
                 // Live cell checks
                 if self.cells[cell_pos] == true {
                     let next_state = match self.get_cell_live_neighbor_count(x, y) {
@@ -47,6 +47,7 @@ impl Map {
     }
 
     fn get_cell_live_neighbor_count(&self, x: usize, y: usize) -> usize {
+        // TODO: Refactor this
         let mut neighbor_count: usize = 0;
         //         |         |
         // x-1,y-1 | x,  y-1 | x+1,y-1
@@ -66,20 +67,20 @@ impl Map {
             // If not on left edge
             if x > 0 {
                 // Top left
-                if self.cells[self.pos(x - 1, y - 1)] == true {
+                if self.cells[self.pos(x - 1, y - 1).unwrap()] == true {
                     neighbor_count += 1
                 }
             }
 
             // Top middle
-            if self.cells[self.pos(x, y - 1)] == true {
+            if self.cells[self.pos(x, y - 1).unwrap()] == true {
                 neighbor_count += 1
             }
 
             // If not on right edge
             if x < self.width - 1 {
                 // Top right
-                if self.cells[self.pos(x + 1, y - 1)] == true {
+                if self.cells[self.pos(x + 1, y - 1).unwrap()] == true {
                     neighbor_count += 1
                 }
             }
@@ -89,7 +90,7 @@ impl Map {
         // If not on left edge
         if x > 0 {
             // Middle left
-            if self.cells[self.pos(x - 1, y)] == true {
+            if self.cells[self.pos(x - 1, y).unwrap()] == true {
                 neighbor_count += 1
             }
         }
@@ -97,7 +98,7 @@ impl Map {
         // If not on right edge
         if x < self.width - 1 {
             // Middle right
-            if self.cells[self.pos(x + 1, y)] == true {
+            if self.cells[self.pos(x + 1, y).unwrap()] == true {
                 neighbor_count += 1
             }
         }
@@ -108,20 +109,20 @@ impl Map {
             // If not on left edge
             if x > 0 {
                 // Bottom left
-                if self.cells[self.pos(x - 1, y + 1)] == true {
+                if self.cells[self.pos(x - 1, y + 1).unwrap()] == true {
                     neighbor_count += 1
                 }
             }
 
             // Bottom middle
-            if self.cells[self.pos(x, y + 1)] == true {
+            if self.cells[self.pos(x, y + 1).unwrap()] == true {
                 neighbor_count += 1;
             }
 
             // If not on right edge
             if x < self.width - 1 {
                 // Bottom right
-                if self.cells[self.pos(x + 1, y + 1)] == true {
+                if self.cells[self.pos(x + 1, y + 1).unwrap()] == true {
                     neighbor_count += 1;
                 }
             }
@@ -130,7 +131,11 @@ impl Map {
         neighbor_count
     }
 
-    pub fn pos(&self, x: usize, y: usize) -> usize {
-        (y * self.width) + x
+    pub fn pos(&self, x: usize, y: usize) -> Option<usize> {
+        if x > self.width - 1 || y > self.height - 1 {
+            None
+        } else {
+            Some((y * self.width) + x)
+        }
     }
 }

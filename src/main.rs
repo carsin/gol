@@ -13,7 +13,7 @@ mod map;
 
 fn main() {
     let stdout = stdout();
-    let map = map::Map::new(70, 70);
+    let map = map::Map::new(50, 50);
     let game = game::Game::new(stdout, map);
 
     run(game);
@@ -52,7 +52,6 @@ fn run(mut game: game::Game) {
             game.update();
 
             // Render
-            //game.stdout.queue(terminal::Clear(terminal::ClearType::All)).unwrap();
             game.render_map();
             game.stdout.flush().unwrap();
         } else {

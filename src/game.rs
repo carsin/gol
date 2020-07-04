@@ -45,7 +45,7 @@ impl Game {
     pub fn render_map(&mut self) {
         for x in 0..self.viewport_width {
             for y in 1..self.viewport_height {
-                // Calculate the position to render return none if negative (can't access negative array indicies)
+                // Calculate the position to render, None if negative (can't access negative array indicies)
                 let x_pos = (x + self.camera_x).checked_sub((self.viewport_width / 2) as usize);
                 let y_pos = (y + self.camera_y).checked_sub((self.viewport_height / 2) as usize);
                 let positions = [x_pos, y_pos];
@@ -53,14 +53,17 @@ impl Game {
                 let chars_to_print = match positions {
                     // Good input
                     [Some(x), Some(y)] => {
-                        // Returns none if invalid index , but since all negative inputs are filtered out with the previous checked subtraction it only checks bad indices beyond the array
-                        match self.map.cells.get(self.map.pos(x, y)) {
-                            Some(false) => ". ",
-                            Some(true) => "██",
-                            None => "  ",
+                        // Check if position is valid (within array)
+                        if let Some(pos) = self.map.pos(x, y) {
+                            match self.map.cells[pos] {
+                                true  => "██",
+                                false => ". ",
+                            }
+                        } else {
+                            "  "
                         }
                     },
-                    // Render inputs with indices that failed the checked subtraction as blank
+                    // Render blank if checked substitution failed
                     _ => "  ",
                 };
 
