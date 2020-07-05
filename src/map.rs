@@ -129,4 +129,15 @@ impl Map {
             Some((y * self.width) + x)
         }
     }
+
+    pub fn clear_map(&mut self) {
+        let cells = vec![false; self.width * self.height];
+        self.cells = cells;
+    }
+
+    pub fn randomize_map(&mut self) {
+        for i in 0..self.cells.len() {
+            self.cells[i] = random(); // Random generates a bool
+        }
+    }
 }

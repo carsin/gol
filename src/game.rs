@@ -122,6 +122,8 @@ impl Game {
             event::KeyCode::Char('a') | event::KeyCode::Char('h') => self.move_camera(Direction::West),
             event::KeyCode::Char('s') | event::KeyCode::Char('j') => self.move_camera(Direction::South),
             event::KeyCode::Char('d') | event::KeyCode::Char('l') => self.move_camera(Direction::East),
+            event::KeyCode::Char('c') => self.map.clear_map(),
+            event::KeyCode::Char('r') => self.map.randomize_map(),
             event::KeyCode::Char(' ') => self.paused = !self.paused,
             event::KeyCode::Enter => self.map.change_cell_state(self.camera_x, self.camera_y),
             _ => (),
