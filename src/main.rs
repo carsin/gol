@@ -1,5 +1,8 @@
 extern crate crossterm;
 
+const UPDATES_PER_SECONDS: u64 = 6;
+const UPDATE_SPEED: u64 = 1000 / UPDATES_PER_SECONDS;
+
 use crossterm::{cursor, event, terminal, QueueableCommand};
 use std::io::{stdout, Write};
 use std::thread::sleep;
@@ -7,51 +10,6 @@ use std::time::{Duration, Instant};
 
 mod game;
 mod map;
-
-const UPDATES_PER_SECONDS: f32 = 6.0;
-const UPDATE_SPEED: f32 = 1000.0 / UPDATES_PER_SECONDS;
-
-pub struct TimeStep {
-    last_time: Instant,
-    delta_time: f32,
-    frame_time: f32,
-    frames: usize,
-}
-
-impl TimeStep {
-    pub fn new() -> TimeStep {
-        TimeStep {
-            last_time: Instant::now(),
-            delta_time: 0.0,
-            frame_time: 0.0,
-            frames: 0,
-        }
-    }
-
-    pub fn get_delta_time(&mut self) -> f32 {
-        let current_time = Instant::now();
-        let delta_time = current_time.duration_since(self.last_time).as_micros() as f32 * 0.001;
-        self.last_time = current_time;
-        self.delta_time = delta_time;
-
-        delta_time
-    }
-
-    pub fn get_fps(&mut self) -> Option<usize> {
-        self.frames += 1;
-        self.frame_time += self.delta_time;
-
-        if self.frame_time >= 1000.0 {
-            let fps = self.frames;
-            self.frames = 0;
-            self.frame_time = 0.0;
-
-            Some(fps)
-        } else {
-            None
-        }
-    }
-}
 
 fn main() {
     let stdout = stdout();
@@ -72,42 +30,39 @@ fn run(mut game: game::Game) {
     terminal::enable_raw_mode().unwrap();
     stdout().flush().unwrap();
 
-    let mut timestep = TimeStep::new();
-    let mut lag = 0.0;
+    let start_time = Instant::now();
+    let mut next_time = start_time.elapsed().as_millis() as u64;
 
     game.running = true;
-    loop {
-        if !game.running { break };
-
-        // Handle input
-        while let Ok(true) = event::poll(Duration::from_millis(UPDATE_SPEED as u64)) {
-            match event::read().unwrap() {
-                // Key input
-                event::Event::Key(key_event) => game.process_key_input(key_event.code),
-                event::Event::Mouse(mouse_event) => game.process_mouse_input(mouse_event),
-                // Terminal resize
-                event::Event::Resize(width, height) => {
-                    game.resize_viewport(width as usize, height as usize)
-                },
+    while game.running {
+        let current_time = start_time.elapsed().as_millis() as u64;
+        if current_time >= next_time {
+            next_time += UPDATE_SPEED;
+            // Handle input
+            while let Ok(true) = event::poll(Duration::from_millis(UPDATE_SPEED)) {
+                match event::read().unwrap() {
+                    // Key input
+                    event::Event::Key(key_event) => game.process_key_input(key_event.code),
+                    event::Event::Mouse(mouse_event) => game.process_mouse_input(mouse_event),
+                    // Terminal resize
+                    event::Event::Resize(width, height) => {
+                        game.resize_viewport(width as usize, height as usize)
+                    },
+                }
             }
-        }
 
-
-        lag += timestep.get_delta_time();
-
-        while lag >= UPDATE_SPEED {
             // Update
             if !game.paused {
                 game.update();
             }
 
-            lag -= UPDATE_SPEED;
+            // Render
+            game.render_status();
+            game.render_map();
+            game.stdout.flush().unwrap();
+        } else {
+            sleep(Duration::from_millis(next_time - current_time));
         }
-
-        // Render
-        game.render_status();
-        game.render_map();
-        game.stdout.flush().unwrap();
     }
 
     stop(game);
