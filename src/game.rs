@@ -60,8 +60,8 @@ impl Game {
                         // Check if position is valid (within array)
                         if let Some(pos) = self.map.pos(x, y) {
                             match self.map.cells[pos] {
-                                true => "██",
                                 false => ". ",
+                                true => "██",
                             }
                         } else {
                             "  "
@@ -134,8 +134,6 @@ impl Game {
             event::KeyCode::Char(' ') => self.paused = !self.paused,
             _ => (),
         }
-
-        self.render_map();
     }
 
     fn move_camera(&mut self, dir: Direction) {
@@ -161,9 +159,11 @@ impl Game {
                 }
             }
         }
+
+        self.render_map();
+        self.render_status();
     }
 
-    // TODO: Fix
     pub fn resize_viewport(&mut self, width: usize, height: usize) {
         self.stdout
             .execute(terminal::Clear(terminal::ClearType::All))
