@@ -13,7 +13,7 @@ mod map;
 
 fn main() {
     let stdout = stdout();
-    let map = map::Map::new(50, 50);
+    let map = map::Map::new(500, 500);
     let game = game::Game::new(stdout, map);
 
     run(game);
