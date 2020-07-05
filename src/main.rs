@@ -39,17 +39,15 @@ fn run(mut game: game::Game) {
         if current_time >= next_time {
             next_time += UPDATE_SPEED;
             // Handle input
-            while let Ok(true) = event::poll(Duration::from_millis(50)) {
+            while let Ok(true) = event::poll(Duration::from_millis(UPDATE_SPEED)) {
                 match event::read().unwrap() {
                     // Key input
                     event::Event::Key(key_event) => game.process_key_input(key_event.code),
                     event::Event::Mouse(mouse_event) => game.process_mouse_input(mouse_event),
-                    // TODO: Fix
                     // Terminal resize
-                    //event::Event::Resize(width, height) => {
-                        //game.resize_viewport(width as usize, height as usize)
-                    //},
-                    _ => (),
+                    event::Event::Resize(width, height) => {
+                        game.resize_viewport(width as usize, height as usize)
+                    },
                 }
             }
 
@@ -59,6 +57,7 @@ fn run(mut game: game::Game) {
             }
 
             // Render
+            game.render_status();
             game.render_map();
             game.stdout.flush().unwrap();
         } else {

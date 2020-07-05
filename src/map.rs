@@ -106,12 +106,6 @@ impl Map {
         neighbors
     }
 
-    pub fn change_cell_state(&mut self, x: usize, y: usize) {
-        if let Some(pos) = self.pos(x, y) {
-            self.cells[pos] = !self.cells[pos];
-        }
-    }
-
     fn get_state_at_pos(&self, x: usize, y: usize) -> Option<bool> {
         let index = self.pos(x, y);
         if let Some(pos) = index {

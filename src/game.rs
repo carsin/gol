@@ -1,5 +1,4 @@
-use crossterm::{cursor, event, style::Print, terminal, QueueableCommand};
-//use std::cmp::{max, min};
+use crossterm::{cursor, event, style::Print, terminal, QueueableCommand, ExecutableCommand};
 
 use super::map;
 
@@ -80,11 +79,19 @@ impl Game {
             }
         }
 
+    }
+
+    pub fn render_status(&mut self) {
         self.stdout
             .queue(cursor::MoveTo(0, 0))
             .unwrap()
             .queue(Print(format!("X: {}, Y: {}", self.camera_x, self.camera_y)))
             .unwrap();
+        if self.paused {
+            print!(" PAUSED");
+        } else {
+            print!("       ");
+        }
     }
 
     pub fn process_mouse_input(&mut self, input: event::MouseEvent) {
@@ -125,7 +132,6 @@ impl Game {
             event::KeyCode::Char('c') => self.map.clear_map(),
             event::KeyCode::Char('r') => self.map.randomize_map(),
             event::KeyCode::Char(' ') => self.paused = !self.paused,
-            event::KeyCode::Enter => self.map.change_cell_state(self.camera_x, self.camera_y),
             _ => (),
         }
 
@@ -158,8 +164,12 @@ impl Game {
     }
 
     // TODO: Fix
-    //pub fn resize_viewport(&mut self, width: usize, height: usize) {
-        //self.viewport_width = width;
-        //self.viewport_height = height;
-    //}
+    pub fn resize_viewport(&mut self, width: usize, height: usize) {
+        self.stdout
+            .execute(terminal::Clear(terminal::ClearType::All))
+            .unwrap();
+
+        self.viewport_width = width / 2;
+        self.viewport_height = height;
+    }
 }
