@@ -1,8 +1,5 @@
 extern crate crossterm;
 
-const UPDATES_PER_SECONDS: u64 = 6;
-const UPDATE_SPEED: u64 = 1000 / UPDATES_PER_SECONDS;
-
 use crossterm::{cursor, event, terminal, QueueableCommand};
 use std::io::{stdout, Write};
 use std::thread::sleep;
@@ -10,6 +7,9 @@ use std::time::{Duration, Instant};
 
 mod game;
 mod map;
+
+const UPDATES_PER_SECONDS: f32 = 10.0;
+const UPDATE_SPEED: f32 = 1000.0 / UPDATES_PER_SECONDS;
 
 fn main() {
     let stdout = stdout();
@@ -31,15 +31,15 @@ fn run(mut game: game::Game) {
     stdout().flush().unwrap();
 
     let start_time = Instant::now();
-    let mut next_time = start_time.elapsed().as_millis() as u64;
+    let mut next_time = start_time.elapsed().as_nanos() as f32;
 
     game.running = true;
     while game.running {
-        let current_time = start_time.elapsed().as_millis() as u64;
+        let current_time = start_time.elapsed().as_nanos() as f32;
         if current_time >= next_time {
             next_time += UPDATE_SPEED;
             // Handle input
-            while let Ok(true) = event::poll(Duration::from_millis(UPDATE_SPEED)) {
+            while let Ok(true) = event::poll(Duration::from_millis(UPDATE_SPEED as u64)) {
                 match event::read().unwrap() {
                     // Key input
                     event::Event::Key(key_event) => game.process_key_input(key_event.code),
@@ -61,7 +61,9 @@ fn run(mut game: game::Game) {
             game.render_map();
             game.stdout.flush().unwrap();
         } else {
-            sleep(Duration::from_millis(next_time - current_time));
+            let sleep_time = (next_time - current_time) as u64;
+            println!("{}", sleep_time);
+            sleep(Duration::from_nanos(sleep_time));
         }
     }
 
