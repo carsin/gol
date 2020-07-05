@@ -9,10 +9,7 @@ pub struct Map {
 impl Map {
     pub fn new(width: usize, height: usize) -> Self {
         // Initialize the map randomly
-        let mut cells = vec![false; width * height];
-        //for i in 0..cells.len() {
-            //cells[i] = random(); // Random generates a bool
-        //}
+        let cells = vec![false; width * height];
 
         Map {
             width,
@@ -47,6 +44,7 @@ impl Map {
     }
 
     fn get_cell_live_neighbor_count(&self, x: usize, y: usize) -> usize {
+        let mut neighbors: usize = 0;
         /* Neighbor points diagram {{{
         *                 |         |
         *         x-1,y-1 | x,  y-1 | x+1,y-1
@@ -61,7 +59,6 @@ impl Map {
         *                 |         |
         *
         }}}*/
-        let mut neighbors: usize = 0;
         // Neighbor checks {{{
         // Top row checks
         // If not on top edge

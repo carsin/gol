@@ -24,7 +24,6 @@ pub struct Game {
 impl Game {
     pub fn new(stdout: std::io::Stdout, map: map::Map) -> Self {
         let viewport_dimensions = terminal::size().unwrap();
-
         // Width is half of terminal because each cell is rendered as 2 characters wide
         let viewport_width = (viewport_dimensions.0 / 2) as usize;
         let viewport_height = viewport_dimensions.1 as usize;
@@ -90,7 +89,7 @@ impl Game {
 
     pub fn process_mouse_input(&mut self, input: event::MouseEvent) {
         match input {
-            event::MouseEvent::Down(event::MouseButton::Left, click_x, click_y, _) | event::MouseEvent::Drag(event::MouseButton::Left, click_x, click_y, _) => {
+            event::MouseEvent::Down(button, click_x, click_y, _) | event::MouseEvent::Drag(button, click_x, click_y, _) => {
                 let click_x_index = (self.camera_x + (click_x / 2) as usize).checked_sub(self.viewport_width / 2);
                 let click_y_index = (self.camera_y + click_y as usize).checked_sub(self.viewport_height / 2);
 
@@ -98,7 +97,13 @@ impl Game {
                 match positions {
                     [Some(click_x_index), Some(click_y_index)] => {
                         if let Some(index) = self.map.pos(click_x_index, click_y_index) {
-                            self.map.cells[index] = true;
+                            match button {
+                                event::MouseButton::Left => self.map.cells[index] = true,
+                                event::MouseButton::Right => self.map.cells[index] = false,
+                                _ => (),
+
+                            }
+
                         }
                     },
                     _ => ()
