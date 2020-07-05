@@ -91,8 +91,8 @@ impl Game {
     pub fn process_mouse_input(&mut self, input: event::MouseEvent) {
         match input {
             event::MouseEvent::Down(event::MouseButton::Left, click_x, click_y, _) | event::MouseEvent::Drag(event::MouseButton::Left, click_x, click_y, _) => {
-                let click_x_index = (self.map.width - self.camera_x + (click_x / 2) as usize).checked_sub(self.viewport_width / 2);
-                let click_y_index = (self.map.height - self.camera_y + click_y as usize).checked_sub(self.viewport_height / 2);
+                let click_x_index = (self.camera_x + (click_x / 2) as usize).checked_sub(self.viewport_width / 2);
+                let click_y_index = (self.camera_y + click_y as usize).checked_sub(self.viewport_height / 2);
 
                 let positions = [click_x_index, click_y_index];
                 match positions {
@@ -103,7 +103,6 @@ impl Game {
                     },
                     _ => ()
                 }
-
             },
             _ => (),
         }

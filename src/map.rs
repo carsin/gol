@@ -10,9 +10,9 @@ impl Map {
     pub fn new(width: usize, height: usize) -> Self {
         // Initialize the map randomly
         let mut cells = vec![false; width * height];
-        for i in 0..cells.len() {
-            cells[i] = random(); // Random generates a bool
-        }
+        //for i in 0..cells.len() {
+            //cells[i] = random(); // Random generates a bool
+        //}
 
         Map {
             width,
