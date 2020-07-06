@@ -95,7 +95,7 @@ impl Game {
             .unwrap()
             .queue(terminal::Clear(terminal::ClearType::CurrentLine))
             .unwrap()
-            .queue(Print(format!("Current Position: X: {}, Y: {} ─── Camera Speed: {}", self.camera_x, self.camera_y, self.camera_speed)))
+            .queue(Print(format!("X: {}, Y: {} ─── Camera Speed: {}", self.camera_x, self.camera_y, self.camera_speed)))
             .unwrap();
         if self.paused {
             let paused_text = "─ PAUSED ─";
@@ -106,7 +106,7 @@ impl Game {
                 .unwrap();
         }
 
-        let right_status_text = format!("Updates Per Second: {} ─── Generation: {}", self.updates_per_second, self.update_count);
+        let right_status_text = format!("Gen/s: {} ─── Gen: {}", self.updates_per_second, self.update_count);
         self.stdout
             .queue(cursor::MoveTo(((self.viewport_width * 2) - right_status_text.len()) as u16, 0))
             .unwrap()

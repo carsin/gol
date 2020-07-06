@@ -58,6 +58,7 @@ fn run(mut game: game::Game) {
             }
 
             // Render
+            game.stdout.queue(cursor::Hide).unwrap();
             game.render_status();
             game.render_map();
             game.stdout.flush().unwrap();
