@@ -18,6 +18,36 @@ fn main() {
     run(game);
 }
 
+struct GameLoop {
+    last_tick: Instant,
+    tps: usize,
+    tps_nanos: f32,
+}
+
+impl GameLoop {
+    pub fn new(tps: usize) -> GameLoop {
+        GameLoop {
+            last_tick: Instant::now(),
+            tps,
+            tps_nanos: (1.0 / tps as f32) * 1000000000.0,
+        }
+    }
+
+    // Slows down the game loop
+    pub fn tick(&mut self) -> f32 {
+        let time = self.last_tick.elapsed();
+        let total_nanos: f32 = time.as_secs() as f32 * 1000000000.0 + time.subsec_nanos() as f32;
+
+        let nano_difference = self.tps_nanos - total_nanos;
+        if nano_difference > 0.0 {
+            sleep(Duration::from_nanos(nano_difference as u64));
+        }
+
+        self.last_tick = Instant::now();
+        nano_difference
+    }
+}
+
 fn run(mut game: game::Game) {
     // Set up terminal
     game.stdout.queue(terminal::EnterAlternateScreen).unwrap();
@@ -29,43 +59,35 @@ fn run(mut game: game::Game) {
     terminal::enable_raw_mode().unwrap();
     stdout().flush().unwrap();
 
-    let start_time = Instant::now();
-    let mut next_time = start_time.elapsed().as_nanos() as f32;
+    let mut game_loop = GameLoop::new(6);
 
     game.running = true;
     while game.running {
-        let tick_time: f32 = 1000.0 / game.updates_per_second;
-
-        let current_time = start_time.elapsed().as_nanos() as f32;
-        if current_time >= next_time {
-            next_time += tick_time;
-            // Handle input
-            while let Ok(true) = event::poll(Duration::from_millis(50)) {
-                match event::read().unwrap() {
-                    // Key input
-                    event::Event::Key(key_event) => game.process_key_input(key_event.code),
-                    event::Event::Mouse(mouse_event) => game.process_mouse_input(mouse_event),
-                    // Terminal resize
-                    event::Event::Resize(width, height) => {
-                        game.resize_viewport(width as usize, height as usize)
-                    },
-                }
+        // Handle input
+        while let Ok(true) = event::poll(Duration::from_millis(10)) {
+            match event::read().unwrap() {
+                // Key input
+                event::Event::Key(key_event) => game.process_key_input(key_event.code),
+                event::Event::Mouse(mouse_event) => game.process_mouse_input(mouse_event),
+                // Terminal resize
+                event::Event::Resize(width, height) => {
+                    game.resize_viewport(width as usize, height as usize)
+                },
             }
-
-            // Update
-            if !game.paused {
-                game.update();
-            }
-
-            // Render
-            game.stdout.queue(cursor::Hide).unwrap();
-            game.render_status();
-            game.render_map();
-            game.stdout.flush().unwrap();
-        } else {
-            let sleep_time = (next_time - current_time) as u64;
-            sleep(Duration::from_nanos(sleep_time));
         }
+
+        // Update
+        if !game.paused {
+            game.update();
+        }
+
+        // Render
+        game.stdout.queue(cursor::Hide).unwrap();
+        game.render_status();
+        game.render_map();
+        game.stdout.flush().unwrap();
+
+        game_loop.tick();
     }
 
     stop(game);
