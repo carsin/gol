@@ -1,6 +1,7 @@
 use crossterm::{cursor, event, style::Print, terminal, QueueableCommand, ExecutableCommand};
 
 use super::map;
+use super::util;
 
 enum Direction {
     North,
@@ -18,6 +19,7 @@ pub struct Game {
     pub viewport_height: usize,
     pub camera_x: usize,
     pub camera_y: usize,
+    pub scroll_speed: usize,
 }
 
 impl Game {
@@ -39,6 +41,7 @@ impl Game {
             viewport_height,
             camera_x,
             camera_y,
+            scroll_speed: 2,
         }
     }
 
@@ -139,24 +142,16 @@ impl Game {
     fn move_camera(&mut self, dir: Direction) {
         match dir {
             Direction::North => {
-                if self.camera_y != 0 {
-                    self.camera_y -= 1;
-                }
+                self.camera_y = util::clamp(self.camera_y.checked_sub(self.scroll_speed).unwrap_or(0), 0, self.map.height);
             }
             Direction::South => {
-                if self.camera_y != self.map.height {
-                    self.camera_y += 1;
-                }
+                self.camera_y = util::clamp(self.camera_y + self.scroll_speed, 0, self.map.height);
             }
             Direction::East => {
-                if self.camera_x != self.map.width {
-                    self.camera_x += 1;
-                }
+                self.camera_x = util::clamp(self.camera_x + self.scroll_speed, 0, self.map.width);
             }
             Direction::West => {
-                if self.camera_x != 0 {
-                    self.camera_x -= 1;
-                }
+                self.camera_x = util::clamp(self.camera_x.checked_sub(self.scroll_speed).unwrap_or(0), 0, self.map.width);
             }
         }
 

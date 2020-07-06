@@ -7,6 +7,7 @@ use std::time::{Duration, Instant};
 
 mod game;
 mod map;
+mod util;
 
 const UPDATES_PER_SECONDS: f32 = 10.0;
 const UPDATE_SPEED: f32 = 1000.0 / UPDATES_PER_SECONDS;
@@ -62,7 +63,6 @@ fn run(mut game: game::Game) {
             game.stdout.flush().unwrap();
         } else {
             let sleep_time = (next_time - current_time) as u64;
-            println!("{}", sleep_time);
             sleep(Duration::from_nanos(sleep_time));
         }
     }
