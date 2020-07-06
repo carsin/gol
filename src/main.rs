@@ -11,7 +11,7 @@ mod util;
 
 fn main() {
     let stdout = stdout();
-    let map = map::Map::new(500, 500);
+    let map = map::Map::new(200, 200);
 
     let game = game::Game::new(stdout, map);
 

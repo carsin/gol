@@ -4,6 +4,7 @@ pub struct Map {
     pub width: usize,
     pub height: usize,
     pub cells: Vec<bool>,
+    pub live_cell_count: usize,
 }
 
 impl Map {
@@ -15,18 +16,21 @@ impl Map {
             width,
             height,
             cells,
+            live_cell_count: 0,
         }
     }
 
     pub fn update(&mut self) {
         // TODO: No need for 2d loop?
         let mut next_generation = self.cells.clone();
+        self.live_cell_count = 0;
 
         for x in 0..self.width {
             for y in 0..self.height {
                 let cell_pos = self.pos(x, y).unwrap();
                 // Live cell checks
                 if self.cells[cell_pos] {
+                    self.live_cell_count += 1;
                     let next_state = match self.get_cell_live_neighbor_count(x, y) {
                         2 | 3 => true,
                         _ => false,

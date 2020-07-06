@@ -106,7 +106,7 @@ impl Game {
                 .unwrap();
         }
 
-        let right_status_text = format!("Gen/s: {} ─── Gen: {}", self.updates_per_second, self.update_count);
+        let right_status_text = format!("Alive Cells: {} ─── Gen: {}", self.map.live_cell_count, self.update_count);
         self.stdout
             .queue(cursor::MoveTo(((self.viewport_width * 2) - right_status_text.len()) as u16, 0))
             .unwrap()
@@ -136,17 +136,10 @@ impl Game {
                     _ => ()
                 }
             },
-
-            event::MouseEvent::ScrollUp(_, _, _) => {
-                self.camera_speed = util::clamp(self.camera_speed + 1, 1, 10);
-            },
-
-            event::MouseEvent::ScrollDown(_, _, _) => {
-                self.camera_speed = util::clamp(self.camera_speed - 1, 1, 10);
-            },
             _ => (),
         }
 
+        self.render_status();
         self.render_map();
     }
 
@@ -158,8 +151,8 @@ impl Game {
             event::KeyCode::Char('s') | event::KeyCode::Char('j') => self.move_camera(Direction::South),
             event::KeyCode::Char('d') | event::KeyCode::Char('l') => self.move_camera(Direction::East),
             event::KeyCode::Char('c') => { self.map.clear_map(); self.update_count = 0; },
-            //event::KeyCode::Char('+') => self.updates_per_second = util::clamp(self.updates_per_second as usize + 1, 1, 15) as f32,
-            //event::KeyCode::Char('-') => self.updates_per_second = util::clamp(self.updates_per_second as usize - 1, 1, 15) as f32,
+            event::KeyCode::Char('+') => self.camera_speed = util::clamp(self.camera_speed + 1, 1, 10),
+            event::KeyCode::Char('-') => self.camera_speed = util::clamp(self.camera_speed - 1, 1, 10),
             event::KeyCode::Char('r') => self.map.randomize_map(),
             event::KeyCode::Char(' ') => self.paused = !self.paused,
             _ => (),
@@ -182,8 +175,8 @@ impl Game {
             }
         }
 
-        self.render_map();
         self.render_status();
+        self.render_map();
     }
 
     pub fn resize_viewport(&mut self, width: usize, height: usize) {
