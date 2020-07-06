@@ -9,11 +9,12 @@ mod game;
 mod map;
 mod util;
 
-const TICKS_PER_SECOND: usize = 8;
+const TICKS_PER_SECOND: u64 = 1000;
+const TICK_TIME: Duration = Duration::from_nanos(((1.0 / TICKS_PER_SECOND as f32) * 1000000000.0) as u64);
 
 fn main() {
     let stdout = stdout();
-    let map = map::Map::new(200, 200);
+    let map = map::Map::new(500, 500);
 
     let game = game::Game::new(stdout, map);
 
@@ -21,15 +22,18 @@ fn main() {
 }
 
 fn run(mut game: game::Game) {
-    // Set up terminal
     set_up_terminal(&mut game);
 
-    let mut last_tick = Instant::now();
-    let tps_nanos: f32 = (1.0 / TICKS_PER_SECOND as f32) * 1000000000.0;
-
-    //let mut game_loop = GameLoop::new(10);
     game.running = true;
+
+    let mut last_tick = Instant::now();
+
     while game.running {
+        let current_tick = Instant::now();
+        let delta_time = current_tick.duration_since(last_tick).as_nanos();
+
+        last_tick = current_tick;
+
         // Handle input
         while let Ok(true) = event::poll(Duration::from_millis(10)) {
             match event::read().unwrap() {
@@ -54,17 +58,10 @@ fn run(mut game: game::Game) {
         game.render_map();
         game.stdout.flush().unwrap();
 
-        // Ensure loop is running at correct speed
-        // Calculates time since last tick and sleeps the thread for that amount of time
-        let time = last_tick.elapsed();
-        let total_nanos: f32 = time.as_secs() as f32 * 1000000000.0 + time.subsec_nanos() as f32;
-
-        let nano_difference = tps_nanos - total_nanos;
-        if nano_difference > 0.0 {
-            sleep(Duration::from_nanos(nano_difference as u64));
+        if delta_time < TICK_TIME.as_nanos() {
+            sleep(TICK_TIME - Duration::from_nanos(delta_time as u64));
+            continue;
         }
-
-        last_tick = Instant::now();
     }
 
     stop(game);
