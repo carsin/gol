@@ -9,8 +9,8 @@ mod game;
 mod map;
 mod util;
 
-const TICKS_PER_SECOND: u64 = 1000;
-const TICK_TIME: Duration = Duration::from_nanos(((1.0 / TICKS_PER_SECOND as f32) * 1000000000.0) as u64);
+const TICKS_PER_SECOND: u64 = 8;
+const TICK_TIME: Duration = Duration::from_millis(1000 / TICKS_PER_SECOND);
 
 fn main() {
     let stdout = stdout();
@@ -30,7 +30,7 @@ fn run(mut game: game::Game) {
 
     while game.running {
         let current_tick = Instant::now();
-        let delta_time = current_tick.duration_since(last_tick).as_nanos();
+        let delta_time = current_tick.duration_since(last_tick);
 
         last_tick = current_tick;
 
@@ -58,8 +58,8 @@ fn run(mut game: game::Game) {
         game.render_map();
         game.stdout.flush().unwrap();
 
-        if delta_time < TICK_TIME.as_nanos() {
-            sleep(TICK_TIME - Duration::from_nanos(delta_time as u64));
+        if delta_time < TICK_TIME {
+            sleep(TICK_TIME - delta_time);
             continue;
         }
     }
