@@ -41,7 +41,7 @@ impl Game {
             viewport_height,
             camera_x,
             camera_y,
-            scroll_speed: 2,
+            scroll_speed: 4,
         }
     }
 
@@ -88,12 +88,18 @@ impl Game {
         self.stdout
             .queue(cursor::MoveTo(0, 0))
             .unwrap()
+            .queue(terminal::Clear(terminal::ClearType::CurrentLine))
+            .unwrap()
             .queue(Print(format!("X: {}, Y: {}", self.camera_x, self.camera_y)))
             .unwrap();
         if self.paused {
-            print!(" PAUSED");
-        } else {
-            print!("       ");
+            let paused_text = "PAUSED";
+            self.stdout
+                .queue(cursor::MoveTo((self.viewport_width - paused_text.len()) as u16, 0))
+                .unwrap()
+                .queue(Print(format!("{}", paused_text)))
+                .unwrap();
+
         }
     }
 
