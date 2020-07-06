@@ -9,12 +9,10 @@ mod game;
 mod map;
 mod util;
 
-const UPDATES_PER_SECONDS: f32 = 10.0;
-const UPDATE_SPEED: f32 = 1000.0 / UPDATES_PER_SECONDS;
-
 fn main() {
     let stdout = stdout();
     let map = map::Map::new(500, 500);
+
     let game = game::Game::new(stdout, map);
 
     run(game);
@@ -36,11 +34,13 @@ fn run(mut game: game::Game) {
 
     game.running = true;
     while game.running {
+        let tick_time: f32 = 1000.0 / game.updates_per_second;
+
         let current_time = start_time.elapsed().as_nanos() as f32;
         if current_time >= next_time {
-            next_time += UPDATE_SPEED;
+            next_time += tick_time;
             // Handle input
-            while let Ok(true) = event::poll(Duration::from_millis(UPDATE_SPEED as u64)) {
+            while let Ok(true) = event::poll(Duration::from_millis(50)) {
                 match event::read().unwrap() {
                     // Key input
                     event::Event::Key(key_event) => game.process_key_input(key_event.code),

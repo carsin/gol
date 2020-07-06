@@ -21,6 +21,7 @@ pub struct Game {
     pub camera_y: usize,
     pub camera_speed: usize,
     pub update_count: usize,
+    pub updates_per_second: f32,
 }
 
 impl Game {
@@ -44,6 +45,7 @@ impl Game {
             camera_y,
             camera_speed: 4,
             update_count: 0,
+            updates_per_second: 5.0,
         }
     }
 
@@ -93,10 +95,10 @@ impl Game {
             .unwrap()
             .queue(terminal::Clear(terminal::ClearType::CurrentLine))
             .unwrap()
-            .queue(Print(format!("X: {}, Y: {}", self.camera_x, self.camera_y)))
+            .queue(Print(format!("Current Position: X: {}, Y: {} ─── Camera Speed: {}", self.camera_x, self.camera_y, self.camera_speed)))
             .unwrap();
         if self.paused {
-            let paused_text = "PAUSED";
+            let paused_text = "─ PAUSED ─";
             self.stdout
                 .queue(cursor::MoveTo((self.viewport_width - paused_text.len()) as u16, 0))
                 .unwrap()
@@ -104,9 +106,9 @@ impl Game {
                 .unwrap();
         }
 
-        let right_status_text = format!("Camera Speed: {} | Generation: {}", self.camera_speed, self.update_count);
+        let right_status_text = format!("Updates Per Second: {} ─── Generation: {}", self.updates_per_second, self.update_count);
         self.stdout
-            .queue(cursor::MoveTo(((self.viewport_width * 2)- right_status_text.len()) as u16, 0))
+            .queue(cursor::MoveTo(((self.viewport_width * 2) - right_status_text.len()) as u16, 0))
             .unwrap()
             .queue(Print(format!("{}", right_status_text)))
             .unwrap();
@@ -156,6 +158,8 @@ impl Game {
             event::KeyCode::Char('s') | event::KeyCode::Char('j') => self.move_camera(Direction::South),
             event::KeyCode::Char('d') | event::KeyCode::Char('l') => self.move_camera(Direction::East),
             event::KeyCode::Char('c') => { self.map.clear_map(); self.update_count = 0; },
+            //event::KeyCode::Char('+') => self.updates_per_second = util::clamp(self.updates_per_second as usize + 1, 1, 15) as f32,
+            //event::KeyCode::Char('-') => self.updates_per_second = util::clamp(self.updates_per_second as usize - 1, 1, 15) as f32,
             event::KeyCode::Char('r') => self.map.randomize_map(),
             event::KeyCode::Char(' ') => self.paused = !self.paused,
             _ => (),
