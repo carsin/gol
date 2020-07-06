@@ -9,6 +9,8 @@ mod game;
 mod map;
 mod util;
 
+const TICKS_PER_SECOND: usize = 8;
+
 fn main() {
     let stdout = stdout();
     let map = map::Map::new(200, 200);
@@ -18,49 +20,14 @@ fn main() {
     run(game);
 }
 
-struct GameLoop {
-    last_tick: Instant,
-    tps: usize,
-    tps_nanos: f32,
-}
-
-impl GameLoop {
-    pub fn new(tps: usize) -> GameLoop {
-        GameLoop {
-            last_tick: Instant::now(),
-            tps,
-            tps_nanos: (1.0 / tps as f32) * 1000000000.0,
-        }
-    }
-
-    // Slows down the game loop
-    pub fn tick(&mut self) -> f32 {
-        let time = self.last_tick.elapsed();
-        let total_nanos: f32 = time.as_secs() as f32 * 1000000000.0 + time.subsec_nanos() as f32;
-
-        let nano_difference = self.tps_nanos - total_nanos;
-        if nano_difference > 0.0 {
-            sleep(Duration::from_nanos(nano_difference as u64));
-        }
-
-        self.last_tick = Instant::now();
-        nano_difference
-    }
-}
-
 fn run(mut game: game::Game) {
     // Set up terminal
-    game.stdout.queue(terminal::EnterAlternateScreen).unwrap();
-    game.stdout.queue(cursor::Hide).unwrap();
-    game.stdout
-        .queue(terminal::Clear(terminal::ClearType::All))
-        .unwrap();
-    game.stdout.queue(event::EnableMouseCapture).unwrap();
-    terminal::enable_raw_mode().unwrap();
-    stdout().flush().unwrap();
+    set_up_terminal(&mut game);
 
-    let mut game_loop = GameLoop::new(6);
+    let mut last_tick = Instant::now();
+    let tps_nanos: f32 = (1.0 / TICKS_PER_SECOND as f32) * 1000000000.0;
 
+    //let mut game_loop = GameLoop::new(10);
     game.running = true;
     while game.running {
         // Handle input
@@ -87,10 +54,31 @@ fn run(mut game: game::Game) {
         game.render_map();
         game.stdout.flush().unwrap();
 
-        game_loop.tick();
+        // Ensure loop is running at correct speed
+        // Calculates time since last tick and sleeps the thread for that amount of time
+        let time = last_tick.elapsed();
+        let total_nanos: f32 = time.as_secs() as f32 * 1000000000.0 + time.subsec_nanos() as f32;
+
+        let nano_difference = tps_nanos - total_nanos;
+        if nano_difference > 0.0 {
+            sleep(Duration::from_nanos(nano_difference as u64));
+        }
+
+        last_tick = Instant::now();
     }
 
     stop(game);
+}
+
+fn set_up_terminal(game: &mut game::Game) {
+    game.stdout.queue(terminal::EnterAlternateScreen).unwrap();
+    game.stdout.queue(cursor::Hide).unwrap();
+    game.stdout
+        .queue(terminal::Clear(terminal::ClearType::All))
+        .unwrap();
+    game.stdout.queue(event::EnableMouseCapture).unwrap();
+    terminal::enable_raw_mode().unwrap();
+    stdout().flush().unwrap();
 }
 
 fn stop(mut game: game::Game) {
