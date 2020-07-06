@@ -19,7 +19,8 @@ pub struct Game {
     pub viewport_height: usize,
     pub camera_x: usize,
     pub camera_y: usize,
-    pub scroll_speed: usize,
+    pub camera_speed: usize,
+    pub update_count: usize,
 }
 
 impl Game {
@@ -41,12 +42,14 @@ impl Game {
             viewport_height,
             camera_x,
             camera_y,
-            scroll_speed: 4,
+            camera_speed: 4,
+            update_count: 0,
         }
     }
 
     pub fn update(&mut self) {
         self.map.update();
+        self.update_count += 1;
     }
 
     pub fn render_map(&mut self) {
@@ -99,8 +102,14 @@ impl Game {
                 .unwrap()
                 .queue(Print(format!("{}", paused_text)))
                 .unwrap();
-
         }
+
+        let right_status_text = format!("Camera Speed: {} | Generation: {}", self.camera_speed, self.update_count);
+        self.stdout
+            .queue(cursor::MoveTo(((self.viewport_width * 2)- right_status_text.len()) as u16, 0))
+            .unwrap()
+            .queue(Print(format!("{}", right_status_text)))
+            .unwrap();
     }
 
     pub fn process_mouse_input(&mut self, input: event::MouseEvent) {
@@ -125,6 +134,14 @@ impl Game {
                     _ => ()
                 }
             },
+
+            event::MouseEvent::ScrollUp(_, _, _) => {
+                self.camera_speed = util::clamp(self.camera_speed + 1, 1, 10);
+            },
+
+            event::MouseEvent::ScrollDown(_, _, _) => {
+                self.camera_speed = util::clamp(self.camera_speed - 1, 1, 10);
+            },
             _ => (),
         }
 
@@ -138,7 +155,7 @@ impl Game {
             event::KeyCode::Char('a') | event::KeyCode::Char('h') => self.move_camera(Direction::West),
             event::KeyCode::Char('s') | event::KeyCode::Char('j') => self.move_camera(Direction::South),
             event::KeyCode::Char('d') | event::KeyCode::Char('l') => self.move_camera(Direction::East),
-            event::KeyCode::Char('c') => self.map.clear_map(),
+            event::KeyCode::Char('c') => { self.map.clear_map(); self.update_count = 0; },
             event::KeyCode::Char('r') => self.map.randomize_map(),
             event::KeyCode::Char(' ') => self.paused = !self.paused,
             _ => (),
@@ -148,16 +165,16 @@ impl Game {
     fn move_camera(&mut self, dir: Direction) {
         match dir {
             Direction::North => {
-                self.camera_y = util::clamp(self.camera_y.checked_sub(self.scroll_speed).unwrap_or(0), 0, self.map.height);
+                self.camera_y = util::clamp(self.camera_y.checked_sub(self.camera_speed).unwrap_or(0), 0, self.map.height);
             }
             Direction::South => {
-                self.camera_y = util::clamp(self.camera_y + self.scroll_speed, 0, self.map.height);
+                self.camera_y = util::clamp(self.camera_y + self.camera_speed, 0, self.map.height);
             }
             Direction::East => {
-                self.camera_x = util::clamp(self.camera_x + self.scroll_speed, 0, self.map.width);
+                self.camera_x = util::clamp(self.camera_x + self.camera_speed, 0, self.map.width);
             }
             Direction::West => {
-                self.camera_x = util::clamp(self.camera_x.checked_sub(self.scroll_speed).unwrap_or(0), 0, self.map.width);
+                self.camera_x = util::clamp(self.camera_x.checked_sub(self.camera_speed).unwrap_or(0), 0, self.map.width);
             }
         }
 
