@@ -7,10 +7,9 @@ use std::time::{Duration, Instant};
 
 mod game;
 mod map;
-mod input;
 mod util;
 
-const UPDATES_PER_SECONDS: f32 = 8.0;
+const UPDATES_PER_SECONDS: f32 = 10.0;
 const UPDATE_SPEED: f32 = 1000.0 / UPDATES_PER_SECONDS;
 
 fn main() {
@@ -35,28 +34,21 @@ fn run(mut game: game::Game) {
     let start_time = Instant::now();
     let mut next_time = start_time.elapsed().as_nanos() as f32;
 
-    let input_receiver = input::start_input_receiver();
-
     game.running = true;
     while game.running {
         let current_time = start_time.elapsed().as_nanos() as f32;
         if current_time >= next_time {
             next_time += UPDATE_SPEED;
-            // Handle key input
-            while let Ok(char) = input_receiver.try_recv() {
-                game.process_key_input(char);
-            }
-
-            // Handle other input
-            while let Ok(true) = event::poll(Duration::from_millis(10)) {
+            // Handle input
+            while let Ok(true) = event::poll(Duration::from_millis(UPDATE_SPEED as u64)) {
                 match event::read().unwrap() {
-                    // Mouse events
+                    // Key input
+                    event::Event::Key(key_event) => game.process_key_input(key_event.code),
                     event::Event::Mouse(mouse_event) => game.process_mouse_input(mouse_event),
                     // Terminal resize
                     event::Event::Resize(width, height) => {
                         game.resize_viewport(width as usize, height as usize)
                     },
-                    _ => ()
                 }
             }
 
@@ -66,11 +58,9 @@ fn run(mut game: game::Game) {
             }
 
             // Render
-            //if current_time > next_time {
-                game.render_status();
-                game.render_map();
-                game.stdout.flush().unwrap();
-            //}
+            game.render_status();
+            game.render_map();
+            game.stdout.flush().unwrap();
         } else {
             let sleep_time = (next_time - current_time) as u64;
             sleep(Duration::from_nanos(sleep_time));
