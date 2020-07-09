@@ -1,47 +1,12 @@
 use crossterm::{cursor, event, style::Print, terminal, QueueableCommand, ExecutableCommand};
+use std::cmp::min;
 
 use super::map;
 use super::util;
+use super::camera;
 
-enum Direction {
-    North,
-    South,
-    East,
-    West,
-}
-
-pub struct Camera {
-    viewport_width: usize,
-    viewport_height: usize,
-    x: usize,
-    y: usize,
-    speed: usize,
-}
-
-impl Camera {
-    fn new(x: usize, y: usize) -> Self {
-        let viewport_dimensions = terminal::size().unwrap();
-        // Width is half of terminal because each cell is rendered as 2 characters wide
-        let viewport_width = (viewport_dimensions.0 / 2) as usize;
-        let viewport_height = viewport_dimensions.1 as usize;
-
-        Self {
-            viewport_width,
-            viewport_height,
-            x,
-            y,
-            speed: 5,
-        }
-    }
-
-    fn pan(&mut self, dir: Direction, max_width: usize, max_height: usize) {
-        match dir {
-            Direction::North => self.y = util::clamp(self.y.checked_sub(self.speed).unwrap_or(0), 0, max_height),
-            Direction::South => self.y = util::clamp(self.y + self.speed, 0, max_height),
-            Direction::East => self.x = util::clamp(self.x + self.speed, 0, max_width),
-            Direction::West => self.x = util::clamp(self.x.checked_sub(self.speed).unwrap_or(0), 0, max_width)
-        }
-    }
+pub enum Direction {
+    North, South, East, West,
 }
 
 pub struct Game {
@@ -49,7 +14,7 @@ pub struct Game {
     pub map: map::Map,
     pub running: bool,
     pub paused: bool,
-    pub camera: Camera,
+    pub camera: camera::Camera,
     pub update_count: usize,
     pub updates_per_second: f32,
 }
@@ -62,7 +27,7 @@ impl Game {
             map,
             running: false,
             paused: false,
-            camera: Camera::new(temp[0] / 2, temp[1] / 2),
+            camera: camera::Camera::new(temp[0] / 2, temp[1] / 2),
             update_count: 0,
             updates_per_second: 5.0,
         }
@@ -170,8 +135,8 @@ impl Game {
             event::KeyCode::Char('s') | event::KeyCode::Char('j') => self.camera.pan(Direction::South, self.map.width, self.map.height),
             event::KeyCode::Char('d') | event::KeyCode::Char('l') => self.camera.pan(Direction::East, self.map.width, self.map.height),
             event::KeyCode::Char('c') => { self.map.clear_map(); self.update_count = 0; },
-            event::KeyCode::Char('+') => self.camera.speed = util::clamp(self.camera.speed + 1, 1, 10),
-            event::KeyCode::Char('-') => self.camera.speed = util::clamp(self.camera.speed - 1, 1, 10),
+            event::KeyCode::Char('+') => self.camera.speed = util::clamp(self.camera.speed + 1, 1, min(self.camera.viewport_width, self.camera.viewport_height)),
+            event::KeyCode::Char('-') => self.camera.speed = util::clamp(self.camera.speed - 1, 1, min(self.camera.viewport_width, self.camera.viewport_height)),
             event::KeyCode::Char('r') => self.map.randomize_map(),
             event::KeyCode::Char(' ') => self.paused = !self.paused,
             _ => (),
@@ -179,10 +144,7 @@ impl Game {
     }
 
     pub fn resize_viewport(&mut self, width: usize, height: usize) {
-        self.stdout
-            .execute(terminal::Clear(terminal::ClearType::All))
-            .unwrap();
-
+        self.stdout.execute(terminal::Clear(terminal::ClearType::All)).unwrap();
         self.camera.viewport_width = width / 2;
         self.camera.viewport_height = height;
     }

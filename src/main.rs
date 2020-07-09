@@ -8,6 +8,7 @@ use std::time::{Duration, Instant};
 mod game;
 mod map;
 mod util;
+mod camera;
 
 const TICKS_PER_SECOND: u64 = 8;
 const TICK_TIME: Duration = Duration::from_millis(1000 / TICKS_PER_SECOND);
