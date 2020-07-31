@@ -15,7 +15,7 @@ const TICK_TIME: Duration = Duration::from_millis(1000 / TICKS_PER_SECOND);
 
 fn main() {
     let stdout = stdout();
-    let map = map::Map::new(500, 500);
+    let map = map::Map::new(200, 200);
 
     let game = game::Game::new(stdout, map);
 
