@@ -1,29 +1,16 @@
 use rand::random;
 
-#[derive(Clone)]
-enum CellState {
-    Surviving,
-    Dying,
-    Growing,
-}
-
-#[derive(Clone)]
-enum Cell {
-    Dead,
-    Alive(CellState)
-}
-
 pub struct Map {
     pub width: usize,
     pub height: usize,
-    pub cells: Vec<Cell>,
+    pub cells: Vec<bool>,
     pub live_cell_count: usize,
 }
 
 impl Map {
     pub fn new(width: usize, height: usize) -> Self {
         // Initialize the map randomly
-        let cells = vec![Cell::Dead; width * height];
+        let cells = vec![false; width * height];
 
         Map {
             width,
@@ -41,21 +28,19 @@ impl Map {
         for x in 0..self.width {
             for y in 0..self.height {
                 let cell_pos = self.pos(x, y).unwrap();
+                // Live cell checks
+                if self.cells[cell_pos] {
+                    self.live_cell_count += 1;
+                    let next_state = match self.get_cell_live_neighbor_count(x, y) {
+                        2 | 3 => true,
+                        _ => false,
+                    };
 
-                match self.cells[cell_pos] {
-                    Alive(_) => {
-                        self.live_cell_count += 1;
-                        let next_state: Cell = match self.get_cell_live_neighbor_count(x, y) {
-                            2 | 3 => Cell::Alive(CellState::Surviving),
-                            _ => Cell::Dead,
-                        };
-                        next_generation[cell_pos] = next_state;
-                    },
-
-                    Dead => {
-                        if self.get_cell_live_neighbor_count(x, y) == 3 {
-                            next_generation[cell_pos] = Cell::Alive(CellState::Growing);
-                        }
+                    next_generation[cell_pos] = next_state;
+                } else {
+                    // Dead cell checks
+                    if self.get_cell_live_neighbor_count(x, y) == 3 {
+                        next_generation[cell_pos] = true;
                     }
                 }
             }
