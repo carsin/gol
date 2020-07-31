@@ -49,7 +49,7 @@ impl Map {
         self.cells = next_generation;
     }
 
-    fn get_cell_live_neighbor_count(&self, x: usize, y: usize) -> usize {
+    pub fn get_cell_live_neighbor_count(&self, x: usize, y: usize) -> usize {
         let mut neighbors: usize = 0;
         /* Neighbor points diagram {{{
         *                 |         |
