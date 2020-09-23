@@ -21,7 +21,6 @@ impl Map {
     }
 
     pub fn update(&mut self) {
-        // TODO: No need for 2d loop?
         let mut next_generation = self.cells.clone();
         self.live_cell_count = 0;
 
@@ -31,6 +30,7 @@ impl Map {
                 // Live cell checks
                 if self.cells[cell_pos] {
                     self.live_cell_count += 1;
+
                     let next_state = match self.get_cell_live_neighbor_count(x, y) {
                         2 | 3 => true,
                         _ => false,

@@ -51,22 +51,9 @@ impl Game {
                     [Some(x), Some(y)] => {
                         // Check if position is valid (within array)
                         if let Some(pos) = self.map.pos(x, y) {
-                            let neighbor_count = self.map.get_cell_live_neighbor_count(x, y);
                             match self.map.cells[pos] {
-                                false => {
-                                    if neighbor_count == 3 {
-                                        "┛┏"
-                                    } else {
-                                        "  "
-                                    }
-                                },
-
-                                true => {
-                                    match neighbor_count {
-                                        2 | 3 => "██",
-                                        _ => "╬╬"
-                                    }
-                                }
+                                false => "  ",
+                                true => "██",
                             }
                         } else {
                             "  "
