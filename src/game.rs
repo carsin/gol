@@ -84,7 +84,7 @@ impl Game {
         if self.paused {
             let paused_text = "─ PAUSED ─";
             self.stdout
-                .queue(cursor::MoveTo((self.camera.viewport_width - paused_text.len()) as u16, 0))
+                .queue(cursor::MoveTo((self.camera.viewport_width - (paused_text.len() / 2)) as u16, 0))
                 .unwrap()
                 .queue(Print(format!("{}", paused_text)))
                 .unwrap();
